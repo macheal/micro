@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/micro/go-micro/v2/auth/jwt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,7 +24,7 @@ func Wrapper(r resolver.Resolver, nr *namespace.Resolver) server.Wrapper {
 			handler:    h,
 			resolver:   r,
 			nsResolver: nr,
-			auth:       auth.DefaultAuth,
+			auth:       jwt.NewAuth(), // auth.DefaultAuth,
 		}
 	}
 }
