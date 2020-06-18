@@ -297,7 +297,7 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	}
 
 	// create the auth wrapper and the server
-	authWrapper := auth.Wrapper(rr, nsResolver)
+	authWrapper := auth.RTSSWrapper(rr, nsResolver)
 	api := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
 
 	api.Init(opts...)
