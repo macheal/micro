@@ -71,9 +71,14 @@ func (a rtssAuthWrapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Set the metadata so we can access it in micro api / web
 	// 白名单，用户获取token
 	req = req.WithContext(ctx.FromRequest(req))
-	if req.URL.Path == "/auth/Auth/Token" {
-		a.handler.ServeHTTP(w, req)
-		return
+	if strings.HasPrefix(req.URL.Path, "/auth") {
+		if req.URL.Path == "/auth/Auth/Token" || req.URL.Path == "/auth/Auth/Inspect" {
+			a.handler.ServeHTTP(w, req)
+			return
+		} else {
+			http.Error(w, "bad request ", 403)
+			return
+		}
 	}
 
 	// Extract the token from the request
