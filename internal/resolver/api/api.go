@@ -28,8 +28,12 @@ func (r *Resolver) Resolve(req *http.Request) (*resolver.Endpoint, error) {
 	}
 
 	ns := r.Options.Namespace(req)
+	serviceName := name
+	if len(ns) > 0 {
+		serviceName = ns + "." + name
+	}
 	return &resolver.Endpoint{
-		Name:   ns + "." + name,
+		Name:   serviceName,
 		Method: method,
 	}, nil
 }
