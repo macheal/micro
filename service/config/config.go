@@ -3,15 +3,16 @@ package config
 import (
 	"context"
 	"fmt"
+	"github.com/micro/go-micro/v2/store"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/micro/cli/v2"
 	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/config/cmd"
 	proto "github.com/micro/go-micro/v2/config/source/service/proto"
 	log "github.com/micro/go-micro/v2/logger"
+	service2 "github.com/micro/go-micro/v2/store/service"
 	"github.com/micro/micro/v2/internal/client"
 	"github.com/micro/micro/v2/service/config/handler"
 )
@@ -39,7 +40,8 @@ func Run(c *cli.Context, srvOpts ...micro.Option) {
 	service := micro.NewService(srvOpts...)
 
 	h := &handler.Config{
-		Store: *cmd.DefaultCmd.Options().Store,
+		//Store: *cmd.DefaultCmd.Options().Store,
+		Store: service2.NewStore(store.WithClient(service.Client())),
 	}
 
 	proto.RegisterConfigHandler(service.Server(), h)
