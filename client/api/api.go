@@ -85,9 +85,13 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 		// backwards compatability
 		Namespace = strings.TrimSuffix(ctx.String("namespace"), "."+Type)
 	}
-
+	Namespace = strings.Trim(Namespace, " ")
+	Type = strings.Trim(Type, " ")
 	// apiNamespace has the format: "go.micro.api"
-	apiNamespace := Namespace + "." + Type
+	apiNamespace := Namespace
+	if len(Type) > 0 {
+		apiNamespace = Namespace + "." + Type
+	}
 
 	// append name to opts
 	srvOpts = append(srvOpts, micro.Name(Name))
@@ -199,7 +203,8 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 
 	// resolver options
 	ropts := []resolver.Option{
-		resolver.WithNamespace(nsResolver.ResolveWithType),
+		//resolver.WithNamespace(nsResolver.ResolveWithType),
+		resolver.WithNamespace(nsResolver.Resolve),
 		resolver.WithHandler(Handler),
 	}
 
@@ -287,7 +292,8 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 			router.WithResolver(rr),
 			router.WithRegistry(service.Options().Registry),
 		)
-		r.PathPrefix(APIPath).Handler(handler.Meta(service, rt, nsResolver.ResolveWithType))
+		r.PathPrefix(APIPath).Handler(handler.Meta(service, rt, nsResolver.Resolve))
+		//r.PathPrefix(APIPath).Handler(handler.Meta(service, rt, nsResolver.ResolveWithType))
 	}
 
 	// reverse wrap handler
@@ -297,7 +303,7 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	}
 
 	// create the auth wrapper and the server
-	authWrapper := auth.Wrapper(rr, nsResolver)
+	authWrapper := auth.RTSSWrapper(rr, nsResolver)
 	api := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
 
 	api.Init(opts...)
