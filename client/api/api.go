@@ -3,6 +3,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/micro/micro/v2/client/api/auth"
 	"net/http"
 	"os"
 	"strings"
@@ -30,7 +31,6 @@ import (
 	httpapi "github.com/micro/go-micro/v2/api/server/http"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/sync/memory"
-	"github.com/micro/micro/v2/client/api/auth"
 	"github.com/micro/micro/v2/internal/handler"
 	"github.com/micro/micro/v2/internal/helper"
 	"github.com/micro/micro/v2/internal/namespace"
@@ -51,6 +51,7 @@ var (
 	Type                  = "api"
 	HeaderPrefix          = "X-Micro-"
 	EnableRPC             = false
+	EnableAUTH            = true
 	ACMEProvider          = "autocert"
 	ACMEChallengeProvider = "cloudflare"
 	ACMECA                = acme.LetsEncryptProductionCA
@@ -73,6 +74,9 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	}
 	if len(ctx.String("enable_rpc")) > 0 {
 		EnableRPC = ctx.Bool("enable_rpc")
+	}
+	if len(ctx.String("enable_auth")) > 0 {
+		EnableAUTH = ctx.Bool("enable_auth")
 	}
 	if len(ctx.String("acme_provider")) > 0 {
 		ACMEProvider = ctx.String("acme_provider")
@@ -302,9 +306,13 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 		h = plugins[i-1].Handler()(h)
 	}
 
-	// create the auth wrapper and the server
-	authWrapper := auth.RTSSWrapper(rr, nsResolver)
-	api := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
+	api_opts := []server.Option{}
+	if EnableAUTH {
+		// create the auth wrapper and the server
+		authWrapper := auth.RTSSWrapper(rr, nsResolver)
+		api_opts = append(api_opts, server.WrapHandler(authWrapper))
+	}
+	api := httpapi.NewServer(Address, api_opts...)
 
 	api.Init(opts...)
 	api.Handle("/", h)
@@ -368,6 +376,12 @@ func Commands(options ...micro.Option) []*cli.Command {
 				Name:    "enable_cors",
 				Usage:   "Enable CORS, allowing the API to be called by frontend applications",
 				EnvVars: []string{"MICRO_API_ENABLE_CORS"},
+				Value:   true,
+			},
+			&cli.BoolFlag{
+				Name:    "enable_auth",
+				Usage:   "Enable auth, allowing the API to be called default:true",
+				EnvVars: []string{"MICRO_API_ENABLE_AUTH"},
 				Value:   true,
 			},
 		},
