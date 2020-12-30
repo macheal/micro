@@ -1,94 +1,62 @@
+// Copyright 2020 Asim Aslam
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Original source: github.com/micro/go-micro/v3/broker/broker.go
+
 // Package broker is the micro broker
 package broker
 
-import (
-	"time"
-
-	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	pb "github.com/micro/go-micro/v2/broker/service/proto"
-	log "github.com/micro/go-micro/v2/logger"
-	"github.com/micro/micro/v2/service/broker/handler"
-)
-
 var (
-	// Name of the broker
-	Name = "go.micro.broker"
-	// The address of the broker
-	Address = ":8001"
+	// DefaultBroker implementation
+	DefaultBroker Broker
 )
 
-func Run(ctx *cli.Context, srvOpts ...micro.Option) {
-	log.Init(log.WithFields(map[string]interface{}{"service": "broker"}))
-
-	if len(ctx.String("server_name")) > 0 {
-		Name = ctx.String("server_name")
-	}
-	if len(ctx.String("address")) > 0 {
-		Address = ctx.String("address")
-	}
-
-	// Init plugins
-	for _, p := range Plugins() {
-		p.Init(ctx)
-	}
-
-	// service opts
-	srvOpts = append(srvOpts, micro.Name(Name))
-	if i := time.Duration(ctx.Int("register_ttl")); i > 0 {
-		srvOpts = append(srvOpts, micro.RegisterTTL(i*time.Second))
-	}
-	if i := time.Duration(ctx.Int("register_interval")); i > 0 {
-		srvOpts = append(srvOpts, micro.RegisterInterval(i*time.Second))
-	}
-
-	// set address
-	if len(Address) > 0 {
-		srvOpts = append(srvOpts, micro.Address(Address))
-	}
-
-	// new service
-	service := micro.NewService(srvOpts...)
-
-	// connect to the broker
-	service.Options().Broker.Connect()
-
-	// register the broker handler
-	pb.RegisterBrokerHandler(service.Server(), &handler.Broker{
-		// using the mdns broker
-		Broker: service.Options().Broker,
-	})
-
-	// run the service
-	service.Run()
+// Broker is an interface used for asynchronous messaging.
+type Broker interface {
+	Init(...Option) error
+	Options() Options
+	Address() string
+	Connect() error
+	Disconnect() error
+	Publish(topic string, m *Message, opts ...PublishOption) error
+	Subscribe(topic string, h Handler, opts ...SubscribeOption) (Subscriber, error)
+	String() string
 }
 
-func Commands(options ...micro.Option) []*cli.Command {
-	command := &cli.Command{
-		Name:  "broker",
-		Usage: "Run the message broker",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "address",
-				Usage:   "Set the broker http address e.g 0.0.0.0:8001",
-				EnvVars: []string{"MICRO_SERVER_ADDRESS"},
-			},
-		},
-		Action: func(ctx *cli.Context) error {
-			Run(ctx, options...)
-			return nil
-		},
-	}
+// Handler is used to process messages via a subscription of a topic.
+type Handler func(*Message) error
 
-	for _, p := range Plugins() {
-		if cmds := p.Commands(); len(cmds) > 0 {
-			command.Subcommands = append(command.Subcommands, cmds...)
-		}
+type ErrorHandler func(*Message, error)
 
-		if flags := p.Flags(); len(flags) > 0 {
-			command.Flags = append(command.Flags, flags...)
-		}
-	}
+type Message struct {
+	Header map[string]string
+	Body   []byte
+}
 
-	return []*cli.Command{command}
+// Subscriber is a convenience return type for the Subscribe method
+type Subscriber interface {
+	Options() SubscribeOptions
+	Topic() string
+	Unsubscribe() error
+}
+
+// Publish a message to a topic
+func Publish(topic string, m *Message) error {
+	return DefaultBroker.Publish(topic, m)
+}
+
+// Subscribe to a topic
+func Subscribe(topic string, h Handler) (Subscriber, error) {
+	return DefaultBroker.Subscribe(topic, h)
 }

@@ -1,120 +1,119 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Original source: github.com/micro/go-micro/v3/store/store.go
+
+// Package store is an interface for distributed data storage.
+// The design document is located at https://github.com/micro/development/blob/master/design/framework/store.md
 package store
 
 import (
-	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	log "github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/store"
-	pb "github.com/micro/go-micro/v2/store/service/proto"
-	mcli "github.com/micro/micro/v2/client/cli"
-	"github.com/micro/micro/v2/service/store/handler"
-	"github.com/pkg/errors"
+	"errors"
+	"time"
 )
 
 var (
-	// Name of the store service
-	Name = "go.micro.store"
-	// Address is the store address
-	Address = ":8002"
+	// DefaultStore implementation
+	DefaultStore Store
+	// DefaultBlobStore implementation
+	DefaultBlobStore BlobStore
+	// ErrNotFound is returned when a key doesn't exist
+	ErrNotFound = errors.New("not found")
 )
 
-// run runs the micro server
-func Run(ctx *cli.Context, srvOpts ...micro.Option) {
-	log.Init(log.WithFields(map[string]interface{}{"service": "store"}))
-
-	// Init plugins
-	for _, p := range Plugins() {
-		p.Init(ctx)
-	}
-
-	if len(ctx.String("server_name")) > 0 {
-		Name = ctx.String("server_name")
-	}
-	if len(ctx.String("address")) > 0 {
-		Address = ctx.String("address")
-	}
-
-	// Initialise service
-	service := micro.NewService(
-		micro.Name(Name),
-	)
-
-	// the store handler
-	storeHandler := &handler.Store{
-		Default: service.Options().Store,
-		Stores:  make(map[string]bool),
-	}
-
-	table := "store"
-	if v := ctx.String("store_table"); len(v) > 0 {
-		table = v
-	}
-
-	// set to store table
-	storeHandler.Default.Init(
-		store.Table(table),
-	)
-
-	backend := storeHandler.Default.String()
-	options := storeHandler.Default.Options()
-
-	log.Infof("Initialising the [%s] store with opts: %+v", backend, options)
-
-	// set the new store initialiser
-	storeHandler.New = func(database string, table string) (store.Store, error) {
-		// Record the new database and table in the internal store
-		if err := storeHandler.Default.Write(&store.Record{
-			Key:   "databases/" + database,
-			Value: []byte{},
-		}, store.WriteTo("micro", "internal")); err != nil {
-			return nil, errors.Wrap(err, "micro store couldn't store new database in internal table")
-		}
-		if err := storeHandler.Default.Write(&store.Record{
-			Key:   "tables/" + database + "/" + table,
-			Value: []byte{},
-		}, store.WriteTo("micro", "internal")); err != nil {
-			return nil, errors.Wrap(err, "micro store couldn't store new table in internal table")
-		}
-
-		return storeHandler.Default, nil
-	}
-
-	pb.RegisterStoreHandler(service.Server(), storeHandler)
-
-	// start the service
-	if err := service.Run(); err != nil {
-		log.Fatal(err)
-	}
+// Store is a data storage interface
+type Store interface {
+	// Init initialises the store. It must perform any required setup on the backing storage implementation and check that it is ready for use, returning any errors.
+	Init(...StoreOption) error
+	// Options allows you to view the current options.
+	Options() StoreOptions
+	// Read takes a single key name and optional ReadOptions. It returns matching []*Record or an error.
+	Read(key string, opts ...ReadOption) ([]*Record, error)
+	// Write() writes a record to the store, and returns an error if the record was not written.
+	Write(r *Record, opts ...WriteOption) error
+	// Delete removes the record with the corresponding key from the store.
+	Delete(key string, opts ...DeleteOption) error
+	// List returns any keys that match, or an empty list with no error if none matched.
+	List(opts ...ListOption) ([]string, error)
+	// Close the store
+	Close() error
+	// String returns the name of the implementation.
+	String() string
 }
 
-// Commands is the cli interface for the store service
-func Commands(options ...micro.Option) []*cli.Command {
-	command := &cli.Command{
-		Name:  "store",
-		Usage: "Run the micro store service",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "address",
-				Usage:   "Set the micro tunnel address :8002",
-				EnvVars: []string{"MICRO_SERVER_ADDRESS"},
-			},
-		},
-		Action: func(ctx *cli.Context) error {
-			Run(ctx, options...)
-			return nil
-		},
-		Subcommands: mcli.StoreCommands(),
+// Record is an item stored or retrieved from a Store
+type Record struct {
+	// The key to store the record
+	Key string `json:"key"`
+	// The value within the record
+	Value []byte `json:"value"`
+	// Any associated metadata for indexing
+	Metadata map[string]interface{} `json:"metadata"`
+	// Time to expire a record: TODO: change to timestamp
+	Expiry time.Duration `json:"expiry,omitempty"`
+}
+
+// Read records
+func Read(key string, opts ...Option) ([]*Record, error) {
+	var options Options
+	for _, o := range opts {
+		o(&options)
 	}
 
-	for _, p := range Plugins() {
-		if cmds := p.Commands(); len(cmds) > 0 {
-			command.Subcommands = append(command.Subcommands, cmds...)
-		}
-
-		if flags := p.Flags(); len(flags) > 0 {
-			command.Flags = append(command.Flags, flags...)
-		}
+	// convert the options
+	var readOpts []ReadOption
+	if len(options.Prefix) > 0 {
+		key = options.Prefix
+		readOpts = append(readOpts, ReadPrefix())
+	}
+	if options.Limit > 0 {
+		readOpts = append(readOpts, ReadLimit(options.Limit))
+	}
+	if options.Offset > 0 {
+		readOpts = append(readOpts, ReadOffset(options.Offset))
 	}
 
-	return []*cli.Command{command}
+	// execute the query
+	return DefaultStore.Read(key, readOpts...)
+}
+
+// Write a record to the store
+func Write(r *Record) error {
+	return DefaultStore.Write(r)
+}
+
+// Delete removes the record with the corresponding key from the store.
+func Delete(key string) error {
+	return DefaultStore.Delete(key)
+}
+
+// List returns any keys that match, or an empty list with no error if none matched.
+func List(opts ...Option) ([]string, error) {
+	var options Options
+	for _, o := range opts {
+		o(&options)
+	}
+
+	// convert the options
+	var listOpts []ListOption
+	if len(options.Prefix) > 0 {
+		listOpts = append(listOpts, ListPrefix(options.Prefix))
+	}
+	if options.Limit > 0 {
+		listOpts = append(listOpts, ListLimit(options.Limit))
+	}
+	if options.Offset > 0 {
+		listOpts = append(listOpts, ListOffset(options.Offset))
+	}
+
+	return DefaultStore.List(listOpts...)
 }
