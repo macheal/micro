@@ -1,6 +1,7 @@
 NAME=micro
 #IMAGE_NAME=micro/$(NAME)
-IMAGE_NAME=hub.smartsteps.com:5000/rtss/macheal/$(NAME)
+#IMAGE_NAME=hub.smartsteps.com/rtss/macheal/$(NAME)
+IMAGE_NAME=rtssregistry:33333/rtss/macheal/$(NAME)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 GIT_TAG=$(shell git describe --abbrev=0 --tags --always --match "v*")
 GIT_IMPORT=github.com/micro/micro/v2/cmd

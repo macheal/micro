@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM hub.smartsteps.com/public/rt_apline
 #RUN apk --no-cache add make git go gcc libtool musl-dev
 
 # Configure Go
