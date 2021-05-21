@@ -27,7 +27,7 @@ var (
 	  <nav class="navbar">
 	    <div class="container">
 	      <div class="navbar-header">
-                <a class="navbar-brand logo" href="/"><img src="https://micro.mu/logo.png" height=50px width=auto /> Stats</a>
+                <a class="navbar-brand logo" href="/"> Stats</a>
 	      </div>
 	    </div>
 	  </nav>
