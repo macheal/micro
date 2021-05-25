@@ -32,6 +32,7 @@ import (
 	"github.com/micro/micro/v2/service/network"
 	"github.com/micro/micro/v2/service/registry"
 	"github.com/micro/micro/v2/service/router"
+	"github.com/micro/micro/v2/service/rtss_config"
 	"github.com/micro/micro/v2/service/runtime"
 	"github.com/micro/micro/v2/service/store"
 	"github.com/micro/micro/v2/service/tunnel"
@@ -355,6 +356,7 @@ func Setup(app *ccli.App, options ...micro.Option) {
 	app.Commands = append(app.Commands, build.Commands()...)
 	app.Commands = append(app.Commands, web.Commands(options...)...)
 	app.Commands = append(app.Commands, config.Commands(options...)...)
+	app.Commands = append(app.Commands, rtss_config.Commands(options...)...)
 
 	// add the init command for our internal operator
 	app.Commands = append(app.Commands, &ccli.Command{
