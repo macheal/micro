@@ -69,6 +69,10 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 		return errors.BadRequest("go.micro.rtss_config.Read", "read error: %v: %v", err, req.Namespace)
 	}
 
+	if ch == nil {
+		return errors.NotFound("go.micro.rtss_config.Read", "Not found")
+	}
+
 	rsp.Change = new(pb.Change)
 
 	// Unmarshal value
