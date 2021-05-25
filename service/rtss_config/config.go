@@ -194,7 +194,7 @@ func delConfig(ctx *cli.Context) error {
 
 func Commands(options ...micro.Option) []*cli.Command {
 	command := &cli.Command{
-		Name:  "config",
+		Name:  "rtss_config",
 		Usage: "Manage configuration values",
 		Subcommands: []*cli.Command{
 			{
