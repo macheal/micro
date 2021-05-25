@@ -63,12 +63,13 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	namespace := setNamespaceKey(ctx, req.Namespace, req.Path)
 
 	ch, err := c.Store.Read(namespace)
-	if err == store.ErrNotFound {
-		return errors.NotFound("go.micro.rtss_config.Read", "Not found")
-	} else if err != nil {
+	if err != nil {
+		if err == store.ErrNotFound || err.Error() == "not found" {
+			return errors.NotFound("go.micro.rtss_config.Read", "Not found")
+		}
 		return errors.BadRequest("go.micro.rtss_config.Read", "read error: %v: %v", err, req.Namespace)
 	}
-
+	// mongo store 实现问题, 需判断返回空的情况
 	if ch == nil {
 		return errors.NotFound("go.micro.rtss_config.Read", "Not found")
 	}
@@ -85,25 +86,25 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 		return nil
 	}
 
-	rc := rsp.Change.ChangeSet
+	//rc := rsp.Change.ChangeSet
 
-	// generate reader.Values from the changeset
-	values, err := values(&source.ChangeSet{
-		Timestamp: time.Unix(rc.Timestamp, 0),
-		Data:      []byte(rc.Data),
-		Checksum:  rc.Checksum,
-		Format:    rc.Format,
-		Source:    rc.Source,
-	})
-	if err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Read", err.Error())
-	}
+	//// generate reader.Values from the changeset
+	//values, err := values(&source.ChangeSet{
+	//	Timestamp: time.Unix(rc.Timestamp, 0),
+	//	Data:      []byte(rc.Data),
+	//	Checksum:  rc.Checksum,
+	//	Format:    rc.Format,
+	//	Source:    rc.Source,
+	//})
+	//if err != nil {
+	//	return errors.InternalServerError("go.micro.rtss_config.Read", err.Error())
+	//}
 
-	// peel apart the path
-	parts := strings.Split(req.Path, PathSplitter)
-
-	// we just want to pass back bytes
-	rsp.Change.ChangeSet.Data = string(values.Get(parts...).Bytes())
+	//// peel apart the path
+	//parts := strings.Split(req.Path, PathSplitter)
+	//
+	//// we just want to pass back bytes
+	//rsp.Change.ChangeSet.Data = string(values.Get(parts...).Bytes())
 
 	return nil
 }
@@ -117,21 +118,25 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return errors.BadRequest("go.micro.rtss_config.Create", "invalid id")
 	}
 
-	if len(req.Change.Path) > 0 {
-		vals, err := values(&source.ChangeSet{
-			Format: "json",
-		})
-		if err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Create", err.Error())
-		}
-
-		// peel apart the path
-		parts := strings.Split(req.Change.Path, PathSplitter)
-		// set the values
-		vals.Set(req.Change.ChangeSet.Data, parts...)
-		// change the changeset value
-		req.Change.ChangeSet.Data = string(vals.Bytes())
+	if len(req.Change.Path) == 0 {
+		return errors.BadRequest("go.micro.rtss_config.Create", "invalid path")
 	}
+
+	//if len(req.Change.Path) > 0 {
+	//	vals, err := values(&source.ChangeSet{
+	//		Format: "json",
+	//	})
+	//	if err != nil {
+	//		return errors.InternalServerError("go.micro.rtss_config.Create", err.Error())
+	//	}
+	//
+	//	// peel apart the path
+	//	parts := strings.Split(req.Change.Path, PathSplitter)
+	//	// set the values
+	//	vals.Set(req.Change.ChangeSet.Data, parts...)
+	//	// change the changeset value
+	//	req.Change.ChangeSet.Data = string(vals.Bytes())
+	//}
 
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
 
@@ -179,12 +184,16 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	records, err := c.Store.Read(namespace)
 	if err != nil {
 		if err.Error() != "not found" {
-			return errors.BadRequest("go.micro.rtss_config.Update", "read old value error: %v", err)
+			return errors.NotFound("go.micro.rtss_config.Update", "read old value error: %v", err)
 		}
 		// create new record
 		record = new(store.Record)
 		record.Key = namespace
 	} else {
+		// mongo store 实现问题, 需判断返回空的情况
+		if records == nil {
+			return errors.NotFound("go.micro.rtss_config.Update", "read old value error: %v", err)
+		}
 		// Unmarshal value
 		if err := json.Unmarshal(records[0].Value, oldCh); err != nil {
 			return errors.BadRequest("go.micro.rtss_config.Read", "unmarshal value error: %v", err)
@@ -192,62 +201,70 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		record = records[0]
 	}
 
-	// generate a new base changeset
-	changeSet := &source.ChangeSet{
-		Format: "json",
-		Data:   []byte(`{}`),
-	}
+	//// generate a new base changeset
+	//changeSet := &source.ChangeSet{
+	//	Format: "json",
+	//	Data:   []byte(`{}`),
+	//}
+	//
+	//if oldCh.ChangeSet != nil {
+	//	changeSet = &source.ChangeSet{
+	//		Timestamp: time.Unix(oldCh.ChangeSet.Timestamp, 0),
+	//		Data:      []byte(oldCh.ChangeSet.Data),
+	//		Checksum:  oldCh.ChangeSet.Checksum,
+	//		Source:    oldCh.ChangeSet.Source,
+	//		Format:    oldCh.ChangeSet.Format,
+	//	}
+	//}
 
-	if oldCh.ChangeSet != nil {
-		changeSet = &source.ChangeSet{
-			Timestamp: time.Unix(oldCh.ChangeSet.Timestamp, 0),
-			Data:      []byte(oldCh.ChangeSet.Data),
-			Checksum:  oldCh.ChangeSet.Checksum,
-			Source:    oldCh.ChangeSet.Source,
-			Format:    oldCh.ChangeSet.Format,
-		}
-	}
+	//var newChange *source.ChangeSet
+	//
+	//// Set the change at a particular path
+	//if len(req.Change.Path) > 0 {
+	//	// Get values from existing change
+	//	values, err := values(changeSet)
+	//	if err != nil {
+	//		return errors.InternalServerError("go.micro.rtss_config.Update", "error getting existing change: %v", err)
+	//	}
 
-	var newChange *source.ChangeSet
+	//// Set the change at a particular path
+	//if len(req.Change.Path) > 0 {
+	//	// Get values from existing change
+	//	values, err := values(changeSet)
+	//	if err != nil {
+	//		return errors.InternalServerError("go.micro.rtss_config.Update", "error getting existing change: %v", err)
+	//	}
+	//
+	//	// Apply the data to the existing change
+	//	values.Set(req.Change.ChangeSet.Data, strings.Split(req.Change.Path, PathSplitter)...)
+	//
+	//	// Create a new change
+	//	newChange, err = merge(&source.ChangeSet{Data: values.Bytes()})
+	//	if err != nil {
+	//		return errors.InternalServerError("go.micro.rtss_config.Update", "create a new change error: %v", err)
+	//	}
+	//} else {
+	//	// No path specified, business as usual
+	//	newChange, err = merge(changeSet, &source.ChangeSet{
+	//		Timestamp: time.Unix(req.Change.ChangeSet.Timestamp, 0),
+	//		Data:      []byte(req.Change.ChangeSet.Data),
+	//		Checksum:  req.Change.ChangeSet.Checksum,
+	//		Source:    req.Change.ChangeSet.Source,
+	//		Format:    req.Change.ChangeSet.Format,
+	//	})
+	//	if err != nil {
+	//		return errors.BadRequest("go.micro.srv.rtss_config.Update", "merge all error: %v", err)
+	//	}
+	//}
 
-	// Set the change at a particular path
-	if len(req.Change.Path) > 0 {
-		// Get values from existing change
-		values, err := values(changeSet)
-		if err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Update", "error getting existing change: %v", err)
-		}
-
-		// Apply the data to the existing change
-		values.Set(req.Change.ChangeSet.Data, strings.Split(req.Change.Path, PathSplitter)...)
-
-		// Create a new change
-		newChange, err = merge(&source.ChangeSet{Data: values.Bytes()})
-		if err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Update", "create a new change error: %v", err)
-		}
-	} else {
-		// No path specified, business as usual
-		newChange, err = merge(changeSet, &source.ChangeSet{
-			Timestamp: time.Unix(req.Change.ChangeSet.Timestamp, 0),
-			Data:      []byte(req.Change.ChangeSet.Data),
-			Checksum:  req.Change.ChangeSet.Checksum,
-			Source:    req.Change.ChangeSet.Source,
-			Format:    req.Change.ChangeSet.Format,
-		})
-		if err != nil {
-			return errors.BadRequest("go.micro.srv.rtss_config.Update", "merge all error: %v", err)
-		}
-	}
-
-	// update change set
-	req.Change.ChangeSet = &pb.ChangeSet{
-		Timestamp: newChange.Timestamp.Unix(),
-		Data:      string(newChange.Data),
-		Checksum:  newChange.Checksum,
-		Source:    newChange.Source,
-		Format:    newChange.Format,
-	}
+	//// update change set
+	//req.Change.ChangeSet = &pb.ChangeSet{
+	//	Timestamp: newChange.Timestamp.Unix(),
+	//	Data:      string(newChange.Data),
+	//	Checksum:  newChange.Checksum,
+	//	Source:    newChange.Source,
+	//	Format:    newChange.Format,
+	//}
 
 	record.Value, err = json.Marshal(req.Change)
 	if err != nil {
