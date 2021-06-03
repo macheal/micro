@@ -42,7 +42,7 @@ func setNamespace(ctx context.Context, v string) string {
 	return ns + ":" + v
 }
 
-func setNamespaceKey(ctx context.Context, v string, _path string) string {
+func setNamespaceKey3(ctx context.Context, v string, _path string) string {
 	ns := namespace.FromContext(ctx)
 	if ns == "go.micro" {
 		ns = "micro"
@@ -53,6 +53,10 @@ func setNamespaceKey(ctx context.Context, v string, _path string) string {
 	}
 
 	return ns + ":" + v + ":" + _path
+}
+
+func getKey(ctx context.Context, v string, _path string) string {
+	return _path
 }
 
 func CheckNamespacePath(id, namespace, path string) error {
@@ -76,9 +80,9 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
-	namespace := setNamespaceKey(ctx, req.Namespace, req.Path)
+	key := getKey(ctx, req.Namespace, req.Path)
 
-	ch, err := c.Store.Read(namespace)
+	ch, err := c.Store.Read(key)
 	if err != nil {
 		if err == store.ErrNotFound || err.Error() == "not found" {
 			return errors.NotFound("go.micro.rtss_config.Read", "Not found")
@@ -153,10 +157,10 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
 
 	//namespace := setNamespace(ctx, req.Change.Namespace)
-	namespace := setNamespaceKey(ctx, req.Change.Namespace, req.Change.Path)
+	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	record := &store.Record{
-		Key: namespace,
+		Key: key,
 	}
 
 	var err error
@@ -169,7 +173,7 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return errors.BadRequest("go.micro.rtss_config.Create", "create new into db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -189,18 +193,18 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	oldCh := &pb.Change{}
 
 	//namespace := setNamespace(ctx, req.Change.Namespace)
-	namespace := setNamespaceKey(ctx, req.Change.Namespace, req.Change.Path)
+	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	// Get the current change set
 	var record *store.Record
-	records, err := c.Store.Read(namespace)
+	records, err := c.Store.Read(key)
 	if err != nil {
 		if err.Error() != "not found" {
 			return errors.NotFound("go.micro.rtss_config.Update", "read old value error: %v", err)
 		}
 		// create new record
 		record = new(store.Record)
-		record.Key = namespace
+		record.Key = key
 	} else {
 		// mongo store 实现问题, 需判断返回空的情况
 		if records == nil {
@@ -287,7 +291,7 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return errors.BadRequest("go.micro.rtss_config.Update", "update into db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -308,11 +312,11 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
 
 	//namespace := setNamespace(ctx, req.Change.Namespace)
-	namespace := setNamespaceKey(ctx, req.Change.Namespace, req.Change.Path)
+	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	// We're going to delete the record as we have no path and no data
 	if len(req.Change.Path) == 0 {
-		if err := c.Store.Delete(namespace); err != nil {
+		if err := c.Store.Delete(key); err != nil {
 			return errors.BadRequest("go.micro.rtss_config.Delete", "delete from db error: %v", err)
 		}
 		return nil
@@ -321,7 +325,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	// We've got a path. Let's update the required path
 
 	// Get the current change set
-	records, err := c.Store.Read(namespace)
+	records, err := c.Store.Read(key)
 	if err != nil {
 		if err.Error() != "not found" {
 			return errors.BadRequest("go.micro.rtss_config.Delete", "read old value error: %v", err)
@@ -374,7 +378,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 		return errors.BadRequest("go.micro.rtss_config.Delete", "update record set to db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -386,7 +390,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 	}
 
 	//ns := setNamespace(ctx, "")
-	//ns := setNamespaceKey(ctx, "", "")
+	//ns := getKey(ctx, "", "")
 
 	// TODO: optimise filtering for prefix listing
 	for _, v := range list {
@@ -420,9 +424,9 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
-	namespace := setNamespaceKey(ctx, req.Namespace, req.Path)
+	key := getKey(ctx, req.Namespace, req.Path)
 
-	watch, err := Watch(namespace)
+	watch, err := Watch(key)
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.Watch", "watch error: %v", err)
 	}
