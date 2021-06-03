@@ -419,14 +419,15 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 }
 
 func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Config_WatchStream) error {
-	if err := CheckNamespacePath("go.micro.rtss_config.Watch", req.Namespace, req.Path); err != nil {
-		return err
+	if len(req.Namespace) == 0 {
+		return errors.BadRequest("go.micro.srv.Watch", "invalid id")
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
-	key := getKey(ctx, req.Namespace, req.Path)
+	//key := getKey(ctx, req.Namespace, req.Path)
+	namespace := req.Namespace
 
-	watch, err := Watch(key)
+	watch, err := Watch(namespace)
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.Watch", "watch error: %v", err)
 	}
