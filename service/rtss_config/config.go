@@ -225,7 +225,7 @@ func Commands(options ...micro.Option) []*cli.Command {
 			&cli.StringFlag{
 				Name:    "namespace",
 				EnvVars: []string{"MICRO_CONFIG_NAMESPACE"},
-				Usage:   "Set the namespace used by the Config Service e.g. go.micro.srv.rtss_config",
+				Usage:   "Set the namespace used by the Config Service e.g. go.micro.rtss_config",
 			},
 			&cli.StringFlag{
 				Name:    "watch_topic",

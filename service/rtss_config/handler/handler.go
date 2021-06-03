@@ -55,9 +55,24 @@ func setNamespaceKey(ctx context.Context, v string, _path string) string {
 	return ns + ":" + v + ":" + _path
 }
 
+func CheckNamespacePath(id, namespace, path string) error {
+	if len(namespace) == 0 {
+		return errors.BadRequest(id, "invalid namespace")
+	}
+
+	if len(path) == 0 {
+		return errors.BadRequest(id, "invalid path")
+	}
+
+	if !strings.HasPrefix(path, namespace) {
+		return errors.BadRequest(id, "invalid request, the path must contain the namespace as a prefix")
+	}
+	return nil
+}
+
 func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResponse) error {
-	if len(req.Namespace) == 0 {
-		return errors.BadRequest("go.micro.rtss_config.Read", "invalid id")
+	if err := CheckNamespacePath("go.micro.rtss_config.Read", req.Namespace, req.Path); err != nil {
+		return err
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
@@ -115,12 +130,8 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return errors.BadRequest("go.micro.rtss_config.Create", "invalid change")
 	}
 
-	if len(req.Change.Namespace) == 0 {
-		return errors.BadRequest("go.micro.rtss_config.Create", "invalid id")
-	}
-
-	if len(req.Change.Path) == 0 {
-		return errors.BadRequest("go.micro.rtss_config.Create", "invalid path")
+	if err := CheckNamespacePath("go.micro.rtss_config.Create", req.Change.Namespace, req.Change.Path); err != nil {
+		return err
 	}
 
 	//if len(req.Change.Path) > 0 {
@@ -168,8 +179,8 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return errors.BadRequest("go.micro.rtss_config.Update", "invalid change")
 	}
 
-	if len(req.Change.Namespace) == 0 {
-		return errors.BadRequest("go.micro.rtss_config.Update", "invalid id")
+	if err := CheckNamespacePath("go.micro.rtss_config.Update", req.Change.Namespace, req.Change.Path); err != nil {
+		return err
 	}
 
 	// set the changeset timestamp
@@ -254,7 +265,7 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	//		Format:    req.Change.ChangeSet.Format,
 	//	})
 	//	if err != nil {
-	//		return errors.BadRequest("go.micro.srv.rtss_config.Update", "merge all error: %v", err)
+	//		return errors.BadRequest("go.micro.rtss_config.Update", "merge all error: %v", err)
 	//	}
 	//}
 
@@ -283,11 +294,11 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 
 func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.DeleteResponse) error {
 	if req.Change == nil {
-		return errors.BadRequest("go.micro.srv.Delete", "invalid change")
+		return errors.BadRequest("go.micro.rtss_config.Delete", "invalid change")
 	}
 
-	if len(req.Change.Namespace) == 0 {
-		return errors.BadRequest("go.micro.srv.Delete", "invalid id")
+	if err := CheckNamespacePath("go.micro.rtss_config.Delete", req.Change.Namespace, req.Change.Path); err != nil {
+		return err
 	}
 
 	if req.Change.ChangeSet == nil {
@@ -302,7 +313,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	// We're going to delete the record as we have no path and no data
 	if len(req.Change.Path) == 0 {
 		if err := c.Store.Delete(namespace); err != nil {
-			return errors.BadRequest("go.micro.srv.Delete", "delete from db error: %v", err)
+			return errors.BadRequest("go.micro.rtss_config.Delete", "delete from db error: %v", err)
 		}
 		return nil
 	}
@@ -313,7 +324,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	records, err := c.Store.Read(namespace)
 	if err != nil {
 		if err.Error() != "not found" {
-			return errors.BadRequest("go.micro.srv.Delete", "read old value error: %v", err)
+			return errors.BadRequest("go.micro.rtss_config.Delete", "read old value error: %v", err)
 		}
 		return nil
 	}
@@ -333,7 +344,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 		Format:    ch.ChangeSet.Format,
 	})
 	if err != nil {
-		return errors.BadRequest("go.micro.srv.Delete", "Get the current config as values error: %v", err)
+		return errors.BadRequest("go.micro.rtss_config.Delete", "Get the current config as values error: %v", err)
 	}
 
 	// Delete at the given path
@@ -342,7 +353,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	// Create a change record from the values
 	change, err := merge(&source.ChangeSet{Data: values.Bytes()})
 	if err != nil {
-		return errors.BadRequest("go.micro.srv.Delete", "Create a change record from the values error: %v", err)
+		return errors.BadRequest("go.micro.rtss_config.Delete", "Create a change record from the values error: %v", err)
 	}
 
 	// Update change set
@@ -360,7 +371,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	}
 
 	if err := c.Store.Write(records[0]); err != nil {
-		return errors.BadRequest("go.micro.srv.Delete", "update record set to db error: %v", err)
+		return errors.BadRequest("go.micro.rtss_config.Delete", "update record set to db error: %v", err)
 	}
 
 	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, ChangeSet: req.Change.ChangeSet})
@@ -369,19 +380,19 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 }
 
 func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResponse) (err error) {
-	list, err := c.Store.List()
+	list, err := c.Store.List(store.ListPrefix(req.Namespace), store.ListSuffix(req.Suffix))
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.List", "query value error: %v", err)
 	}
 
 	//ns := setNamespace(ctx, "")
-	ns := setNamespaceKey(ctx, "", "")
+	//ns := setNamespaceKey(ctx, "", "")
 
 	// TODO: optimise filtering for prefix listing
 	for _, v := range list {
-		if !strings.HasPrefix(v, ns) {
-			continue
-		}
+		//if !strings.HasPrefix(v, ns) {
+		//	continue
+		//}
 
 		rec, err := c.Store.Read(v)
 		if err != nil {
@@ -404,8 +415,8 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 }
 
 func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Config_WatchStream) error {
-	if len(req.Namespace) == 0 {
-		return errors.BadRequest("go.micro.srv.Watch", "invalid id")
+	if err := CheckNamespacePath("go.micro.rtss_config.Watch", req.Namespace, req.Path); err != nil {
+		return err
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
@@ -413,7 +424,7 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 
 	watch, err := Watch(namespace)
 	if err != nil {
-		return errors.BadRequest("go.micro.srv.Watch", "watch error: %v", err)
+		return errors.BadRequest("go.micro.rtss_config.Watch", "watch error: %v", err)
 	}
 	defer watch.Stop()
 
@@ -428,13 +439,13 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 	for {
 		ch, err := watch.Next()
 		if err != nil {
-			return errors.BadRequest("go.micro.srv.Watch", "listen the Next error: %v", err)
+			return errors.BadRequest("go.micro.rtss_config.Watch", "listen the Next error: %v", err)
 		}
 		if ch.ChangeSet != nil {
 			ch.ChangeSet.Data = string(ch.ChangeSet.Data)
 		}
 		if err := stream.Send(ch); err != nil {
-			return errors.BadRequest("go.micro.srv.Watch", "send the Change error: %v", err)
+			return errors.BadRequest("go.micro.rtss_config.Watch", "send the Change error: %v", err)
 		}
 	}
 }
