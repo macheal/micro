@@ -36,3 +36,4 @@ require (
 )
 
 //replace github.com/macheal/go-micro-plugins => /Users/wangguangyu/go/src/github.com/macheal/go-micro-plugins
+replace github.com/macheal/go-micro-plugins => d:/project/Goland/research/go-micro-plugins

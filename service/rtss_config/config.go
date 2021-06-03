@@ -11,12 +11,13 @@ import (
 	"github.com/micro/cli/v2"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/config/cmd"
-	proto "github.com/micro/go-micro/v2/config/source/service/proto"
+	//proto "github.com/micro/go-micro/v2/config/source/service/proto"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/store"
 	"github.com/micro/micro/v2/internal/client"
 	"github.com/micro/micro/v2/internal/helper"
 	"github.com/micro/micro/v2/service/rtss_config/handler"
+	proto "github.com/micro/micro/v2/service/rtss_config/proto"
 )
 
 var (

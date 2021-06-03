@@ -11,10 +11,11 @@ import (
 	cr "github.com/micro/go-micro/v2/config/reader"
 	jr "github.com/micro/go-micro/v2/config/reader/json"
 	"github.com/micro/go-micro/v2/config/source"
-	pb "github.com/micro/go-micro/v2/config/source/service/proto"
+	//pb "github.com/micro/go-micro/v2/config/source/service/proto"
 	"github.com/micro/go-micro/v2/errors"
 	"github.com/micro/go-micro/v2/store"
 	"github.com/micro/micro/v2/internal/namespace"
+	pb "github.com/micro/micro/v2/service/rtss_config/proto"
 )
 
 var (
