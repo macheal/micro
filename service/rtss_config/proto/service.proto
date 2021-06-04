@@ -66,5 +66,6 @@ message WatchRequest {
 
 message WatchResponse {
     string namespace = 1;
+    string path = 3;
     ChangeSet changeSet = 2;
 }

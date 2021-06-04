@@ -11,10 +11,11 @@ import (
 	cr "github.com/micro/go-micro/v2/config/reader"
 	jr "github.com/micro/go-micro/v2/config/reader/json"
 	"github.com/micro/go-micro/v2/config/source"
+	"github.com/micro/micro/v2/internal/namespace"
+
 	//pb "github.com/micro/go-micro/v2/config/source/service/proto"
 	"github.com/micro/go-micro/v2/errors"
 	"github.com/micro/go-micro/v2/store"
-	"github.com/micro/micro/v2/internal/namespace"
 	pb "github.com/micro/micro/v2/service/rtss_config/proto"
 )
 
@@ -42,20 +43,14 @@ func setNamespace(ctx context.Context, v string) string {
 	return ns + ":" + v
 }
 
-func setNamespaceKey3(ctx context.Context, v string, _path string) string {
-	ns := namespace.FromContext(ctx)
-	if ns == "go.micro" {
-		ns = "micro"
+func setNamespaceReal(ctx context.Context, v string) string {
+	if len(v) == 0 {
+		return "/rtss"
 	}
-
-	if _path == "" {
-		return ns + ":" + v
-	}
-
-	return ns + ":" + v + ":" + _path
+	return v
 }
 
-func getKey(ctx context.Context, v string, _path string) string {
+func setKey(ctx context.Context, v string, _path string) string {
 	return _path
 }
 
@@ -80,7 +75,7 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
-	key := getKey(ctx, req.Namespace, req.Path)
+	key := setKey(ctx, req.Namespace, req.Path)
 
 	ch, err := c.Store.Read(key)
 	if err != nil {
@@ -156,8 +151,8 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
 
-	//namespace := setNamespace(ctx, req.Change.Namespace)
-	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
+	namespace := setNamespaceReal(ctx, req.Change.Namespace)
+	key := req.Change.Path
 
 	record := &store.Record{
 		Key: key,
@@ -173,7 +168,7 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return errors.BadRequest("go.micro.rtss_config.Create", "create new into db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -192,8 +187,8 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 
 	oldCh := &pb.Change{}
 
-	//namespace := setNamespace(ctx, req.Change.Namespace)
-	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
+	namespace := setNamespaceReal(ctx, req.Change.Namespace)
+	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	// Get the current change set
 	var record *store.Record
@@ -291,7 +286,7 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return errors.BadRequest("go.micro.rtss_config.Update", "update into db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -311,8 +306,8 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
 
-	//namespace := setNamespace(ctx, req.Change.Namespace)
-	key := getKey(ctx, req.Change.Namespace, req.Change.Path)
+	namespace := setNamespaceReal(ctx, req.Change.Namespace)
+	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	// We're going to delete the record as we have no path and no data
 	if len(req.Change.Path) == 0 {
@@ -378,7 +373,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 		return errors.BadRequest("go.micro.rtss_config.Delete", "update record set to db error: %v", err)
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: key, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
 
 	return nil
 }
@@ -390,7 +385,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 	}
 
 	//ns := setNamespace(ctx, "")
-	//ns := getKey(ctx, "", "")
+	//ns := setKey(ctx, "", "")
 
 	// TODO: optimise filtering for prefix listing
 	for _, v := range list {
@@ -424,8 +419,7 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 	}
 
 	//namespace := setNamespace(ctx, req.Namespace)
-	//key := getKey(ctx, req.Namespace, req.Path)
-	namespace := req.Namespace
+	namespace := setNamespaceReal(ctx, req.Namespace)
 
 	watch, err := Watch(namespace)
 	if err != nil {
