@@ -61,6 +61,10 @@ func Run(c *cli.Context, srvOpts ...micro.Option) {
 	proto.RegisterConfigHandler(service.Server(), h)
 	micro.RegisterSubscriber(handler.WatchTopic, service.Server(), handler.Watcher)
 
+	log.Infof("uri %v", MgoUrl)
+	log.Infof("dbname %v", MgoDatabaseName)
+	log.Infof("table %v", MgoTableName)
+
 	if err := service.Run(); err != nil {
 		log.Fatalf("config Run the service error: ", err)
 	}
