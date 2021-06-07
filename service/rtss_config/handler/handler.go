@@ -238,14 +238,6 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	//		return errors.InternalServerError("go.micro.rtss_config.Update", "error getting existing change: %v", err)
 	//	}
 
-	//// Set the change at a particular path
-	//if len(req.Change.Path) > 0 {
-	//	// Get values from existing change
-	//	values, err := values(changeSet)
-	//	if err != nil {
-	//		return errors.InternalServerError("go.micro.rtss_config.Update", "error getting existing change: %v", err)
-	//	}
-	//
 	//	// Apply the data to the existing change
 	//	values.Set(req.Change.ChangeSet.Data, strings.Split(req.Change.Path, PathSplitter)...)
 	//
