@@ -301,73 +301,84 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
-	// We're going to delete the record as we have no path and no data
-	if len(req.Change.Path) == 0 {
-		if err := c.Store.Delete(key); err != nil {
-			return errors.BadRequest("go.micro.rtss_config.Delete", "delete from db error: %v", err)
-		}
-		return nil
+	//------------------------------------------------------------------------------
+	// 修改 Delete 逻辑
+	if err := c.Store.Delete(key); err != nil {
+		return errors.BadRequest("go.micro.rtss_config.Delete", "delete from db error: %v", err)
 	}
 
-	// We've got a path. Let's update the required path
-
-	// Get the current change set
-	records, err := c.Store.Read(key)
-	if err != nil {
-		if err.Error() != "not found" {
-			return errors.BadRequest("go.micro.rtss_config.Delete", "read old value error: %v", err)
-		}
-		return nil
-	}
-
-	ch := &pb.Change{}
-	// Unmarshal value
-	if err := json.Unmarshal(records[0].Value, ch); err != nil {
-		return errors.BadRequest("go.micro.rtss_config.Read", "unmarshal value error: %v", err)
-	}
-
-	// Get the current config as values
-	values, err := values(&source.ChangeSet{
-		Timestamp: time.Unix(ch.ChangeSet.Timestamp, 0),
-		Data:      []byte(ch.ChangeSet.Data),
-		Checksum:  ch.ChangeSet.Checksum,
-		Source:    ch.ChangeSet.Source,
-		Format:    ch.ChangeSet.Format,
-	})
-	if err != nil {
-		return errors.BadRequest("go.micro.rtss_config.Delete", "Get the current config as values error: %v", err)
-	}
-
-	// Delete at the given path
-	values.Del(strings.Split(req.Change.Path, PathSplitter)...)
-
-	// Create a change record from the values
-	change, err := merge(&source.ChangeSet{Data: values.Bytes()})
-	if err != nil {
-		return errors.BadRequest("go.micro.rtss_config.Delete", "Create a change record from the values error: %v", err)
-	}
-
-	// Update change set
-	req.Change.ChangeSet = &pb.ChangeSet{
-		Timestamp: change.Timestamp.Unix(),
-		Data:      string(change.Data),
-		Checksum:  change.Checksum,
-		Format:    change.Format,
-		Source:    change.Source,
-	}
-
-	records[0].Value, err = json.Marshal(req.Change)
-	if err != nil {
-		return errors.BadRequest("go.micro.rtss_config.Update", "marshal error: %v", err)
-	}
-
-	if err := c.Store.Write(records[0]); err != nil {
-		return errors.BadRequest("go.micro.rtss_config.Delete", "update record set to db error: %v", err)
-	}
-
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: nil})
 
 	return nil
+	//------------------------------------------------------------------------------
+
+	//// We're going to delete the record as we have no path and no data
+	//if len(req.Change.Path) == 0 {
+	//	if err := c.Store.Delete(key); err != nil {
+	//		return errors.BadRequest("go.micro.rtss_config.Delete", "delete from db error: %v", err)
+	//	}
+	//	return nil
+	//}
+	//
+	//// We've got a path. Let's update the required path
+	//
+	//// Get the current change set
+	//records, err := c.Store.Read(key)
+	//if err != nil {
+	//	if err.Error() != "not found" {
+	//		return errors.BadRequest("go.micro.rtss_config.Delete", "read old value error: %v", err)
+	//	}
+	//	return nil
+	//}
+	//
+	//ch := &pb.Change{}
+	//// Unmarshal value
+	//if err := json.Unmarshal(records[0].Value, ch); err != nil {
+	//	return errors.BadRequest("go.micro.rtss_config.Read", "unmarshal value error: %v", err)
+	//}
+	//
+	//// Get the current config as values
+	//values, err := values(&source.ChangeSet{
+	//	Timestamp: time.Unix(ch.ChangeSet.Timestamp, 0),
+	//	Data:      []byte(ch.ChangeSet.Data),
+	//	Checksum:  ch.ChangeSet.Checksum,
+	//	Source:    ch.ChangeSet.Source,
+	//	Format:    ch.ChangeSet.Format,
+	//})
+	//if err != nil {
+	//	return errors.BadRequest("go.micro.rtss_config.Delete", "Get the current config as values error: %v", err)
+	//}
+	//
+	//// Delete at the given path
+	//values.Del(strings.Split(req.Change.Path, PathSplitter)...)
+	//
+	//// Create a change record from the values
+	//change, err := merge(&source.ChangeSet{Data: values.Bytes()})
+	//if err != nil {
+	//	return errors.BadRequest("go.micro.rtss_config.Delete", "Create a change record from the values error: %v", err)
+	//}
+	//
+	//// Update change set
+	//req.Change.ChangeSet = &pb.ChangeSet{
+	//	Timestamp: change.Timestamp.Unix(),
+	//	Data:      string(change.Data),
+	//	Checksum:  change.Checksum,
+	//	Format:    change.Format,
+	//	Source:    change.Source,
+	//}
+	//
+	//records[0].Value, err = json.Marshal(req.Change)
+	//if err != nil {
+	//	return errors.BadRequest("go.micro.rtss_config.Update", "marshal error: %v", err)
+	//}
+	//
+	//if err := c.Store.Write(records[0]); err != nil {
+	//	return errors.BadRequest("go.micro.rtss_config.Delete", "update record set to db error: %v", err)
+	//}
+	//
+	//_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+	//
+	//return nil
 }
 
 func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResponse) (err error) {
