@@ -14,6 +14,7 @@ import (
 	"github.com/micro/micro/v2/internal/namespace"
 
 	//pb "github.com/macheal/go-micro/v2/config/source/service/proto"
+	"github.com/macheal/go-micro-plugins/store/mongo"
 	"github.com/macheal/go-micro/v2/errors"
 	"github.com/macheal/go-micro/v2/store"
 	pb "github.com/micro/micro/v2/service/rtss_config/proto"
@@ -382,7 +383,10 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 }
 
 func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResponse) (err error) {
-	list, err := c.Store.List(store.ListPrefix(req.Namespace), store.ListSuffix(req.Suffix))
+	list, err := c.Store.List(
+		store.ListPrefix(req.Namespace),
+		store.ListSuffix(req.Suffix),
+		mongo.SetListMidSubstr(req.MidSubstr))
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.List", "query value error: %v", err)
 	}
