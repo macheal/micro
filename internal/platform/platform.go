@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/macheal/go-micro/v2/config/cmd"
+	log "github.com/macheal/go-micro/v2/logger"
+	gorun "github.com/macheal/go-micro/v2/runtime"
+	signalutil "github.com/macheal/go-micro/v2/util/signal"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/config/cmd"
-	log "github.com/micro/go-micro/v2/logger"
-	gorun "github.com/micro/go-micro/v2/runtime"
-	signalutil "github.com/micro/go-micro/v2/util/signal"
 
 	// include usage
 

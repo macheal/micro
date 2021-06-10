@@ -17,8 +17,8 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
 	github.com/macheal/go-micro-plugins v0.0.0-20210223135452-c847c7708cc6
+	github.com/macheal/go-micro/v2 v2.9.1
 	github.com/micro/cli/v2 v2.1.2
-	github.com/micro/go-micro/v2 v2.9.1
 	github.com/miekg/dns v1.1.27
 	github.com/netdata/go-orchestrator v0.0.0-20190905093727-c793edba0e8f
 	github.com/olekukonko/tablewriter v0.0.4
@@ -37,3 +37,5 @@ require (
 
 //replace github.com/macheal/go-micro-plugins => /Users/wangguangyu/go/src/github.com/macheal/go-micro-plugins
 replace github.com/macheal/go-micro-plugins => d:/project/Goland/micro/go-micro-plugins
+
+replace github.com/macheal/go-micro/v2 => d:/project/Goland/micro/go-micro

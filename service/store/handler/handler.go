@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/store"
-	pb "github.com/micro/go-micro/v2/store/service/proto"
+	"github.com/macheal/go-micro/v2/errors"
+	"github.com/macheal/go-micro/v2/metadata"
+	"github.com/macheal/go-micro/v2/store"
+	pb "github.com/macheal/go-micro/v2/store/service/proto"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

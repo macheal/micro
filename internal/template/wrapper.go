@@ -6,8 +6,8 @@ var (
 import (
 	"context"
 
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/server"
+	"github.com/macheal/go-micro/v2"
+	"github.com/macheal/go-micro/v2/server"
 	{{.Alias}} "path/to/service/proto/{{.Alias}}"
 )
 

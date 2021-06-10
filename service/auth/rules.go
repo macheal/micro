@@ -8,9 +8,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	pb "github.com/macheal/go-micro/v2/auth/service/proto"
+	"github.com/macheal/go-micro/v2/errors"
 	"github.com/micro/cli/v2"
-	pb "github.com/micro/go-micro/v2/auth/service/proto"
-	"github.com/micro/go-micro/v2/errors"
 	"github.com/micro/micro/v2/internal/client"
 )
 

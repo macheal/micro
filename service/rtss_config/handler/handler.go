@@ -7,15 +7,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/client"
-	cr "github.com/micro/go-micro/v2/config/reader"
-	jr "github.com/micro/go-micro/v2/config/reader/json"
-	"github.com/micro/go-micro/v2/config/source"
+	"github.com/macheal/go-micro/v2/client"
+	cr "github.com/macheal/go-micro/v2/config/reader"
+	jr "github.com/macheal/go-micro/v2/config/reader/json"
+	"github.com/macheal/go-micro/v2/config/source"
 	"github.com/micro/micro/v2/internal/namespace"
 
-	//pb "github.com/micro/go-micro/v2/config/source/service/proto"
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/store"
+	//pb "github.com/macheal/go-micro/v2/config/source/service/proto"
+	"github.com/macheal/go-micro/v2/errors"
+	"github.com/macheal/go-micro/v2/store"
 	pb "github.com/micro/micro/v2/service/rtss_config/proto"
 )
 

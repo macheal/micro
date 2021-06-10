@@ -5,10 +5,10 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/micro/go-micro/v2/api/resolver"
-	"github.com/micro/go-micro/v2/client/selector"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/registry/memory"
+	"github.com/macheal/go-micro/v2/api/resolver"
+	"github.com/macheal/go-micro/v2/client/selector"
+	"github.com/macheal/go-micro/v2/registry"
+	"github.com/macheal/go-micro/v2/registry/memory"
 )
 
 func TestWebResolver(t *testing.T) {

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro/go-micro/v2/auth"
-	pb "github.com/micro/go-micro/v2/auth/service/proto"
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/store"
-	memStore "github.com/micro/go-micro/v2/store/memory"
+	"github.com/macheal/go-micro/v2/auth"
+	pb "github.com/macheal/go-micro/v2/auth/service/proto"
+	"github.com/macheal/go-micro/v2/errors"
+	"github.com/macheal/go-micro/v2/store"
+	memStore "github.com/macheal/go-micro/v2/store/memory"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

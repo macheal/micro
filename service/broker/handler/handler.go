@@ -3,10 +3,10 @@ package handler
 import (
 	"context"
 
-	"github.com/micro/go-micro/v2/broker"
-	pb "github.com/micro/go-micro/v2/broker/service/proto"
-	"github.com/micro/go-micro/v2/errors"
-	log "github.com/micro/go-micro/v2/logger"
+	"github.com/macheal/go-micro/v2/broker"
+	pb "github.com/macheal/go-micro/v2/broker/service/proto"
+	"github.com/macheal/go-micro/v2/errors"
+	log "github.com/macheal/go-micro/v2/logger"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

@@ -1,10 +1,10 @@
 package manager
 
 import (
-	"github.com/micro/go-micro/v2/config/cmd"
-	"github.com/micro/go-micro/v2/runtime"
-	"github.com/micro/go-micro/v2/store"
-	"github.com/micro/go-micro/v2/store/memory"
+	"github.com/macheal/go-micro/v2/config/cmd"
+	"github.com/macheal/go-micro/v2/runtime"
+	"github.com/macheal/go-micro/v2/store"
+	"github.com/macheal/go-micro/v2/store/memory"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

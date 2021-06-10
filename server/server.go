@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/macheal/go-micro/v2"
+	"github.com/macheal/go-micro/v2/config/cmd"
+	log "github.com/macheal/go-micro/v2/logger"
+	gorun "github.com/macheal/go-micro/v2/runtime"
+	handler "github.com/macheal/go-micro/v2/util/file"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/config/cmd"
-	log "github.com/micro/go-micro/v2/logger"
-	gorun "github.com/micro/go-micro/v2/runtime"
-	handler "github.com/micro/go-micro/v2/util/file"
 	"github.com/micro/micro/v2/internal/platform"
 	"github.com/micro/micro/v2/internal/update"
 )

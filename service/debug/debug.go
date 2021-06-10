@@ -2,12 +2,12 @@
 package debug
 
 import (
+	"github.com/macheal/go-micro/v2"
+	"github.com/macheal/go-micro/v2/debug/log"
+	"github.com/macheal/go-micro/v2/debug/log/kubernetes"
+	dservice "github.com/macheal/go-micro/v2/debug/service"
+	ulog "github.com/macheal/go-micro/v2/logger"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/debug/log"
-	"github.com/micro/go-micro/v2/debug/log/kubernetes"
-	dservice "github.com/micro/go-micro/v2/debug/service"
-	ulog "github.com/micro/go-micro/v2/logger"
 	logHandler "github.com/micro/micro/v2/service/debug/log/handler"
 	pblog "github.com/micro/micro/v2/service/debug/log/proto"
 	statshandler "github.com/micro/micro/v2/service/debug/stats/handler"

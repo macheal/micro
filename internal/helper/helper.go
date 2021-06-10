@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/macheal/go-micro/v2/metadata"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/metadata"
 )
 
 func ACMEHosts(ctx *cli.Context) []string {
