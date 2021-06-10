@@ -44,7 +44,7 @@ message DeleteResponse {}
 message ListRequest {
     string namespace = 1;
     string suffix = 2;
-    string midSubstr = 3;
+    string substr = 3;
 }
 
 message ListResponse {
