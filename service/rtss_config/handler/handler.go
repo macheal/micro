@@ -386,7 +386,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 	list, err := c.Store.List(
 		store.ListPrefix(req.Namespace),
 		store.ListSuffix(req.Suffix),
-		mongo.SetListMidSubstr(req.MidSubstr))
+		mongo.SetListSubstr(req.Substr))
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.List", "query value error: %v", err)
 	}
