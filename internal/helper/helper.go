@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/macheal/go-micro/v2/metadata"
+	"gitee.com/smartsteps/go-micro/v2/metadata"
 	"github.com/micro/cli/v2"
 )
 

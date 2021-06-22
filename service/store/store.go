@@ -1,10 +1,10 @@
 package store
 
 import (
-	"github.com/macheal/go-micro/v2"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/store"
-	pb "github.com/macheal/go-micro/v2/store/service/proto"
+	"gitee.com/smartsteps/go-micro/v2"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/store"
+	pb "gitee.com/smartsteps/go-micro/v2/store/service/proto"
 	"github.com/micro/cli/v2"
 	mcli "github.com/micro/micro/v2/client/cli"
 	"github.com/micro/micro/v2/internal/helper"

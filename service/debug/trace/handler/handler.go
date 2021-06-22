@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/macheal/go-micro/v2/client"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	debug "github.com/macheal/go-micro/v2/debug/service/proto"
-	"github.com/macheal/go-micro/v2/errors"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/registry"
-	"github.com/macheal/go-micro/v2/util/ring"
+	"gitee.com/smartsteps/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	debug "gitee.com/smartsteps/go-micro/v2/debug/service/proto"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/registry"
+	"gitee.com/smartsteps/go-micro/v2/util/ring"
 	trace "github.com/micro/micro/v2/service/debug/trace/proto"
 )
 

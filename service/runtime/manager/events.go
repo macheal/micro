@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/runtime"
-	"github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/runtime"
+	"gitee.com/smartsteps/go-micro/v2/store"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

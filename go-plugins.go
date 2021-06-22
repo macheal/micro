@@ -1,5 +1,5 @@
 package main
 
 import (
-	_ "github.com/macheal/go-micro-plugins/registry/nacos/v2"
+	_ "gitee.com/smartsteps/go-micro-plugins/registry/nacos/v2"
 )

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/store"
 )
 
 func TestCloudflare(t *testing.T) {

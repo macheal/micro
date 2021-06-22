@@ -3,8 +3,8 @@ package manager
 import (
 	"testing"
 
-	"github.com/macheal/go-micro/v2/runtime"
-	"github.com/macheal/go-micro/v2/store/memory"
+	"gitee.com/smartsteps/go-micro/v2/runtime"
+	"gitee.com/smartsteps/go-micro/v2/store/memory"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

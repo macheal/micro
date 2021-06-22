@@ -4,11 +4,11 @@ package runtime
 import (
 	"os"
 
-	"github.com/macheal/go-micro/v2"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/runtime"
-	pb "github.com/macheal/go-micro/v2/runtime/service/proto"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/runtime"
+	pb "gitee.com/smartsteps/go-micro/v2/runtime/service/proto"
 	"github.com/micro/cli/v2"
 	"github.com/micro/micro/v2/service/runtime/handler"
 	"github.com/micro/micro/v2/service/runtime/manager"

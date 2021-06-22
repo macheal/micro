@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/macheal/go-micro/v2/errors"
-	"github.com/macheal/go-micro/v2/proxy"
-	"github.com/macheal/go-micro/v2/server"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/proxy"
+	"gitee.com/smartsteps/go-micro/v2/server"
 )
 
 //Proxy for a proxy instance

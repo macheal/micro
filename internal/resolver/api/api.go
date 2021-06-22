@@ -4,7 +4,7 @@ package micro
 import (
 	"net/http"
 
-	"github.com/macheal/go-micro/v2/api/resolver"
+	"gitee.com/smartsteps/go-micro/v2/api/resolver"
 )
 
 // default resolver for legacy purposes

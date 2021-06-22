@@ -9,14 +9,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/macheal/go-micro/v2/auth"
-	pb "github.com/macheal/go-micro/v2/auth/service/proto"
-	"github.com/macheal/go-micro/v2/auth/token"
-	"github.com/macheal/go-micro/v2/auth/token/basic"
-	"github.com/macheal/go-micro/v2/errors"
-	"github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/store"
-	memStore "github.com/macheal/go-micro/v2/store/memory"
+	"gitee.com/smartsteps/go-micro/v2/auth"
+	pb "gitee.com/smartsteps/go-micro/v2/auth/service/proto"
+	"gitee.com/smartsteps/go-micro/v2/auth/token"
+	"gitee.com/smartsteps/go-micro/v2/auth/token/basic"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/store"
+	memStore "gitee.com/smartsteps/go-micro/v2/store/memory"
 	"github.com/micro/micro/v2/internal/namespace"
 	"golang.org/x/crypto/bcrypt"
 )

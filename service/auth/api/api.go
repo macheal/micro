@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/macheal/go-micro/v2"
-	log "github.com/macheal/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 	"github.com/micro/cli/v2"
 
 	pb "github.com/micro/micro/v2/service/auth/api/proto"

@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/go-acme/lego/v3/providers/dns/cloudflare"
-	"github.com/macheal/go-micro/v2/api/server/acme"
-	cert "github.com/macheal/go-micro/v2/api/server/acme/certmagic"
-	"github.com/macheal/go-micro/v2/sync/memory"
+	"gitee.com/smartsteps/go-micro/v2/api/server/acme"
+	cert "gitee.com/smartsteps/go-micro/v2/api/server/acme/certmagic"
+	"gitee.com/smartsteps/go-micro/v2/sync/memory"
 	cfstore "github.com/micro/micro/v2/internal/plugins/store/cloudflare"
 )
 

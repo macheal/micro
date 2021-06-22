@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/store"
 	"github.com/pkg/errors"
 )
 

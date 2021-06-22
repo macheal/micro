@@ -10,8 +10,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/dustin/go-humanize"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	"github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	"gitee.com/smartsteps/go-micro/v2/store"
 	"github.com/micro/cli/v2"
 	"github.com/pkg/errors"
 )

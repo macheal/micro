@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	conf "github.com/macheal/go-micro/v2/config"
-	"github.com/macheal/go-micro/v2/config/source/file"
-	"github.com/macheal/go-micro/v2/util/log"
+	conf "gitee.com/smartsteps/go-micro/v2/config"
+	"gitee.com/smartsteps/go-micro/v2/config/source/file"
+	"gitee.com/smartsteps/go-micro/v2/util/log"
 )
 
 // FileName for global micro config

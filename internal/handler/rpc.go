@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/macheal/go-micro/v2/api/server/cors"
-	"github.com/macheal/go-micro/v2/client"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	"github.com/macheal/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/api/server/cors"
+	"gitee.com/smartsteps/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	"gitee.com/smartsteps/go-micro/v2/errors"
 	"github.com/micro/micro/v2/internal/helper"
 )
 

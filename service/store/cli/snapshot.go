@@ -3,7 +3,7 @@ package cli
 import (
 	"net/url"
 
-	"github.com/macheal/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/logger"
 	"github.com/micro/cli/v2"
 	"github.com/micro/micro/v2/service/store/snapshot"
 	"github.com/pkg/errors"

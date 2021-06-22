@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 
-	//proto "github.com/macheal/go-micro/v2/config/source/service/proto"
+	//proto "gitee.com/smartsteps/go-micro/v2/config/source/service/proto"
 	proto "github.com/micro/micro/v2/service/rtss_config/proto"
 )
 

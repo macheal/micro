@@ -1,6 +1,6 @@
 package manager
 
-import "github.com/macheal/go-micro/v2/store"
+import "gitee.com/smartsteps/go-micro/v2/store"
 
 // Options for the runtime manager
 type Options struct {

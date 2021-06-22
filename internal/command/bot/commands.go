@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/macheal/go-micro/v2/agent/command"
+	"gitee.com/smartsteps/go-micro/v2/agent/command"
 	"github.com/micro/cli/v2"
 	clic "github.com/micro/micro/v2/internal/command/cli"
 )

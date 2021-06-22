@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/runtime"
-	"github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/runtime"
+	"gitee.com/smartsteps/go-micro/v2/store"
 )
 
 // statusPrefix is prefixed to every status key written to the memory store

@@ -3,16 +3,16 @@ package auth
 import (
 	"context"
 	"fmt"
-	"github.com/macheal/go-micro/v2/auth/jwt"
+	"gitee.com/smartsteps/go-micro/v2/auth/jwt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/macheal/go-micro/v2/api/resolver"
-	"github.com/macheal/go-micro/v2/api/server"
-	"github.com/macheal/go-micro/v2/auth"
-	"github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/util/ctx"
+	"gitee.com/smartsteps/go-micro/v2/api/resolver"
+	"gitee.com/smartsteps/go-micro/v2/api/server"
+	"gitee.com/smartsteps/go-micro/v2/auth"
+	"gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/util/ctx"
 	inauth "github.com/micro/micro/v2/internal/auth"
 	"github.com/micro/micro/v2/internal/namespace"
 )

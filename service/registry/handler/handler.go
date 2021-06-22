@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/macheal/go-micro/v2"
-	"github.com/macheal/go-micro/v2/auth"
-	"github.com/macheal/go-micro/v2/errors"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/registry"
-	"github.com/macheal/go-micro/v2/registry/service"
-	pb "github.com/macheal/go-micro/v2/registry/service/proto"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/auth"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/registry"
+	"gitee.com/smartsteps/go-micro/v2/registry/service"
+	pb "gitee.com/smartsteps/go-micro/v2/registry/service/proto"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

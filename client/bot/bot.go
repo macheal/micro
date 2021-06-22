@@ -11,20 +11,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/macheal/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2"
 	"github.com/micro/cli/v2"
 
-	"github.com/macheal/go-micro/v2/agent/command"
-	"github.com/macheal/go-micro/v2/agent/input"
-	log "github.com/macheal/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/agent/command"
+	"gitee.com/smartsteps/go-micro/v2/agent/input"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 	botc "github.com/micro/micro/v2/internal/command/bot"
 
-	proto "github.com/macheal/go-micro/v2/agent/proto"
+	proto "gitee.com/smartsteps/go-micro/v2/agent/proto"
 
 	// inputs
-	_ "github.com/macheal/go-micro/v2/agent/input/discord"
-	_ "github.com/macheal/go-micro/v2/agent/input/slack"
-	_ "github.com/macheal/go-micro/v2/agent/input/telegram"
+	_ "gitee.com/smartsteps/go-micro/v2/agent/input/discord"
+	_ "gitee.com/smartsteps/go-micro/v2/agent/input/slack"
+	_ "gitee.com/smartsteps/go-micro/v2/agent/input/telegram"
 )
 
 type bot struct {

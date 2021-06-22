@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/macheal/go-micro/v2"
-	goapi "github.com/macheal/go-micro/v2/api"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/network"
-	"github.com/macheal/go-micro/v2/network/resolver"
-	pb "github.com/macheal/go-micro/v2/network/service/proto"
+	"gitee.com/smartsteps/go-micro/v2"
+	goapi "gitee.com/smartsteps/go-micro/v2/api"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/network"
+	"gitee.com/smartsteps/go-micro/v2/network/resolver"
+	pb "gitee.com/smartsteps/go-micro/v2/network/service/proto"
 	"github.com/micro/cli/v2"
 )
 

@@ -5,9 +5,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/macheal/go-micro/v2"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	gostore "github.com/macheal/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	gostore "gitee.com/smartsteps/go-micro/v2/store"
 	ccli "github.com/micro/cli/v2"
 	"github.com/micro/micro/v2/plugin"
 	"github.com/micro/micro/v2/plugin/build"

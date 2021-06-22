@@ -2,12 +2,12 @@
 package plugins
 
 import (
-	"github.com/macheal/go-micro/v2/config/cmd"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
 
 	// import specific plugins
-	ckStore "github.com/macheal/go-micro/v2/store/cockroach"
-	fileStore "github.com/macheal/go-micro/v2/store/file"
-	memStore "github.com/macheal/go-micro/v2/store/memory"
+	ckStore "gitee.com/smartsteps/go-micro/v2/store/cockroach"
+	fileStore "gitee.com/smartsteps/go-micro/v2/store/file"
+	memStore "gitee.com/smartsteps/go-micro/v2/store/memory"
 	// we only use CF internally for certs
 	cfStore "github.com/micro/micro/v2/internal/plugins/store/cloudflare"
 )

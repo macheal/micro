@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	log "github.com/macheal/go-micro/v2/logger"
-	goplugin "github.com/macheal/go-micro/v2/plugin"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	goplugin "gitee.com/smartsteps/go-micro/v2/plugin"
 	"github.com/micro/cli/v2"
 	"github.com/micro/micro/v2/plugin"
 )

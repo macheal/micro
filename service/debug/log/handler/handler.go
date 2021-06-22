@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/macheal/go-micro/v2/debug/log"
-	"github.com/macheal/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/debug/log"
+	"gitee.com/smartsteps/go-micro/v2/errors"
 	pb "github.com/micro/micro/v2/service/debug/log/proto"
 )
 

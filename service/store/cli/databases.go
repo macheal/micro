@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/macheal/go-micro/v2/config/cmd"
-	storeproto "github.com/macheal/go-micro/v2/store/service/proto"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	storeproto "gitee.com/smartsteps/go-micro/v2/store/service/proto"
 	"github.com/micro/cli/v2"
 )
 

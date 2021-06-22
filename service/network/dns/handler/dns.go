@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/metadata"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/metadata"
 	dns "github.com/micro/micro/v2/service/network/dns/proto/dns"
 	"github.com/micro/micro/v2/service/network/dns/provider"
 	"github.com/pkg/errors"

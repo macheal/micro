@@ -9,12 +9,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/macheal/go-micro/v2/client"
-	"github.com/macheal/go-micro/v2/client/selector"
-	"github.com/macheal/go-micro/v2/config/cmd"
-	"github.com/macheal/go-micro/v2/metadata"
-	"github.com/macheal/go-micro/v2/registry/memory"
-	"github.com/macheal/go-micro/v2/server"
+	"gitee.com/smartsteps/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/client/selector"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	"gitee.com/smartsteps/go-micro/v2/metadata"
+	"gitee.com/smartsteps/go-micro/v2/registry/memory"
+	"gitee.com/smartsteps/go-micro/v2/server"
 )
 
 type TestHandler struct {

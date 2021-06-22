@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/macheal/go-micro/v2/config/cmd"
-	log "github.com/macheal/go-micro/v2/logger"
-	gorun "github.com/macheal/go-micro/v2/runtime"
-	signalutil "github.com/macheal/go-micro/v2/util/signal"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	gorun "gitee.com/smartsteps/go-micro/v2/runtime"
+	signalutil "gitee.com/smartsteps/go-micro/v2/util/signal"
 	"github.com/micro/cli/v2"
 
 	// include usage

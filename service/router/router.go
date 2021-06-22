@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/macheal/go-micro/v2"
-	log "github.com/macheal/go-micro/v2/logger"
-	"github.com/macheal/go-micro/v2/router"
-	pb "github.com/macheal/go-micro/v2/router/service/proto"
+	"gitee.com/smartsteps/go-micro/v2"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/router"
+	pb "gitee.com/smartsteps/go-micro/v2/router/service/proto"
 	"github.com/micro/cli/v2"
 	"github.com/micro/micro/v2/service/router/handler"
 )
