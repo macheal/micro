@@ -2,7 +2,9 @@ package handler
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +14,7 @@ import (
 	jr "gitee.com/smartsteps/go-micro/v2/config/reader/json"
 	"gitee.com/smartsteps/go-micro/v2/config/source"
 	"github.com/patrickmn/go-cache"
+	"golang.org/x/sync/singleflight"
 
 	"gitee.com/smartsteps/go-micro-plugins/store/mongo"
 	"gitee.com/smartsteps/go-micro/v2/errors"
@@ -31,7 +34,8 @@ var (
 
 type Config struct {
 	Store store.Store
-	Cache     *cache.Cache
+	Cache *cache.Cache
+	group singleflight.Group
 }
 
 func setNamespaceReal(ctx context.Context, v string) string {
@@ -68,28 +72,37 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 
 	key := setKey(ctx, req.Namespace, req.Path)
 
-	// read cache
-	v, ok := c.Cache.Get(key)
-	if ok {
-		obj := v.(*pb.Change)
-		rsp.Change = obj
-		return nil
+	do := func() (interface{}, error) {
+		// read cache
+		v, ok := c.Cache.Get(key)
+		if ok {
+			obj := v.(*pb.Change)
+			return obj, nil
+		}
+
+		ch, err := c.Store.Read(key)
+		if err != nil {
+			if err == store.ErrNotFound || err.Error() == "not found" {
+				return nil, errors.NotFound(id, "not found key: %s", key)
+			}
+			return nil, errors.InternalServerError(id, "read key %s error: %v", key, err)
+		}
+		// mongo store 实现问题, 需判断返回空的情况
+		if ch == nil {
+			return nil, errors.NotFound(id, "not found key: %s", key)
+		}
+
+		return ch, nil
 	}
 
-	ch, err := c.Store.Read(key)
+	// 以 key 为单元阻塞
+	result, err, _ := c.group.Do(key, do)
 	if err != nil {
-		if err == store.ErrNotFound || err.Error() == "not found" {
-			return errors.NotFound(id, "not found key: %s", key)
-		}
-		return errors.InternalServerError(id, "read key %s error: %v", key, err)
+		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
-	// mongo store 实现问题, 需判断返回空的情况
-	if ch == nil {
-		return errors.NotFound(id, "not found key: %s", key)
-	}
+	ch := result.([]*store.Record)
 
 	rsp.Change = new(pb.Change)
-
 	// Unmarshal value
 	if err = json.Unmarshal(ch[0].Value, rsp.Change); err != nil {
 		return errors.InternalServerError(id, "unmarshal key %v value error: %v", key, err)
@@ -118,20 +131,31 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		Key: key,
 	}
 
-	var err error
-	record.Value, err = json.Marshal(req.Change)
+	value, err := json.Marshal(req.Change)
 	if err != nil {
 		return errors.InternalServerError(id, "marshal key %v value error: %v", err)
 	}
 
-	// set cache
-	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
+	do := func() (interface{}, error) {
+		// set cache
+		c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
-	if err := c.Store.Write(record); err != nil {
-		return errors.InternalServerError(id, "write key %s error: %v", err)
+		record.Value = value
+		if err := c.Store.Write(record); err != nil {
+			return nil, errors.InternalServerError(id, "write key %s error: %v", err)
+		}
+
+		_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+
+		return nil, nil
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+	hash := md5.Sum(record.Value)
+	hashKey := fmt.Sprintf("%x", hash)
+	_, err, _ = c.group.Do(hashKey, do)
+	if err != nil {
+		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
+	}
 
 	return nil
 }
@@ -154,41 +178,53 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
-	// Get the current change set
-	var record *store.Record
-	records, err := c.Store.Read(key)
-	if err != nil {
-		if err.Error() != "not found" {
-			return errors.NotFound(id, "read old value error: %v", err)
-		}
-		// create new record
-		record = new(store.Record)
-		record.Key = key
-	} else {
-		// mongo store 实现问题, 需判断返回空的情况
-		if records == nil {
-			return errors.NotFound(id, "read old value error: %v", err)
-		}
-		// Unmarshal value
-		if err := json.Unmarshal(records[0].Value, oldCh); err != nil {
-			return errors.InternalServerError(id, "unmarshal key %s value error: %v", key, err)
-		}
-		record = records[0]
-	}
-
-	record.Value, err = json.Marshal(req.Change)
+	value, err := json.Marshal(req.Change)
 	if err != nil {
 		return errors.InternalServerError(id, "marshal error: %v", err)
 	}
 
-	// set cache
-	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
+	do := func() (interface{}, error) {
+		// Get the current change set
+		var record *store.Record
+		records, err := c.Store.Read(key)
+		if err != nil {
+			if err.Error() != "not found" {
+				return nil, errors.NotFound(id, "read old value error: %v", err)
+			}
+			// create new record
+			record = new(store.Record)
+			record.Key = key
+		} else {
+			// mongo store 实现问题, 需判断返回空的情况
+			if records == nil {
+				return nil, errors.NotFound(id, "read old value error: %v", err)
+			}
+			// Unmarshal value
+			if err := json.Unmarshal(records[0].Value, oldCh); err != nil {
+				return nil, errors.InternalServerError(id, "unmarshal key %s value error: %v", key, err)
+			}
+			record = records[0]
+		}
 
-	if err := c.Store.Write(record); err != nil {
-		return errors.InternalServerError(id, "write key %s error: %v", key, err)
+		record.Value = value
+
+		// set cache
+		c.Cache.Set(key, req.Change, cache.DefaultExpiration)
+
+		if err := c.Store.Write(record); err != nil {
+			return nil, errors.InternalServerError(id, "write key %s error: %v", key, err)
+		}
+
+		_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+		return nil, nil
 	}
 
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+	hash := md5.Sum(value)
+	hashKey := fmt.Sprintf("%x", hash)
+	_, err, _ = c.group.Do(hashKey, do)
+	if err != nil {
+		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
+	}
 
 	return nil
 }
@@ -212,14 +248,21 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
-	// delete cache
-	c.Cache.Delete(key)
+	do := func() (interface{}, error) {
+		// delete cache
+		c.Cache.Delete(key)
 
-	if err := c.Store.Delete(key); err != nil {
-		return errors.InternalServerError(id, "delete key %s error: %v", key, err)
+		if err := c.Store.Delete(key); err != nil {
+			return nil, errors.InternalServerError(id, "delete key %s error: %v", key, err)
+		}
+
+		_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: nil})
+		return nil, nil
 	}
-
-	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: nil})
+	_, err, _ := c.group.Do(key, do)
+	if err != nil {
+		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
+	}
 
 	return nil
 }
