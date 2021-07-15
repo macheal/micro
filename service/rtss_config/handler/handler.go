@@ -12,6 +12,7 @@ import (
 	jr "gitee.com/smartsteps/go-micro/v2/config/reader/json"
 	"gitee.com/smartsteps/go-micro/v2/config/source"
 	"github.com/micro/micro/v2/internal/namespace"
+	"github.com/patrickmn/go-cache"
 
 	//pb "gitee.com/smartsteps/go-micro/v2/config/source/service/proto"
 	"gitee.com/smartsteps/go-micro-plugins/store/mongo"
@@ -32,6 +33,7 @@ var (
 
 type Config struct {
 	Store store.Store
+	Cache     *cache.Cache
 }
 
 // setNamespace figures out what the namespace should be
@@ -77,6 +79,14 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 
 	//namespace := setNamespace(ctx, req.Namespace)
 	key := setKey(ctx, req.Namespace, req.Path)
+
+	// read cache
+	v, ok := c.Cache.Get(key)
+	if ok {
+		obj := v.(*pb.Change)
+		rsp.Change = obj
+		return nil
+	}
 
 	ch, err := c.Store.Read(key)
 	if err != nil {
@@ -164,6 +174,9 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 	if err != nil {
 		return errors.BadRequest("go.micro.rtss_config.Create", "marshal error: %v", err)
 	}
+
+	// set cache
+	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
 	if err := c.Store.Write(record); err != nil {
 		return errors.BadRequest("go.micro.rtss_config.Create", "create new into db error: %v", err)
@@ -275,6 +288,9 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return errors.BadRequest("go.micro.rtss_config.Update", "marshal error: %v", err)
 	}
 
+	// set cache
+	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
+
 	if err := c.Store.Write(record); err != nil {
 		return errors.BadRequest("go.micro.rtss_config.Update", "update into db error: %v", err)
 	}
@@ -301,6 +317,9 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
+
+	// delete cache
+	c.Cache.Delete(key)
 
 	//------------------------------------------------------------------------------
 	// 修改 Delete 逻辑

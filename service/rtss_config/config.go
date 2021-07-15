@@ -11,6 +11,8 @@ import (
 	"gitee.com/smartsteps/go-micro/v2"
 	"gitee.com/smartsteps/go-micro/v2/config/cmd"
 	"github.com/micro/cli/v2"
+	"github.com/patrickmn/go-cache"
+
 	//proto "gitee.com/smartsteps/go-micro/v2/config/source/service/proto"
 	log "gitee.com/smartsteps/go-micro/v2/logger"
 	"gitee.com/smartsteps/go-micro/v2/store"
@@ -31,6 +33,9 @@ var (
 	MgoUrl          string
 	MgoDatabaseName string
 	MgoTableName    string
+
+	CacheDuration        time.Duration
+	CacheCleanupInterval time.Duration
 )
 
 func Run(c *cli.Context, srvOpts ...micro.Option) {
@@ -48,9 +53,8 @@ func Run(c *cli.Context, srvOpts ...micro.Option) {
 
 	h := &handler.Config{
 		Store: *cmd.DefaultCmd.Options().Store,
-		//Store: service2.NewStore(store.WithClient(service.Client())),
+		Cache: cache.New(CacheDuration, CacheCleanupInterval),
 	}
-	//h.Store = file.NewStore()
 	opts := []store.Option{
 		mongo.URI(MgoUrl),
 		store.Database(MgoDatabaseName),
@@ -235,6 +239,21 @@ func Commands(options ...micro.Option) []*cli.Command {
 				Name:    "watch_topic",
 				EnvVars: []string{"MICRO_CONFIG_WATCH_TOPIC"},
 				Usage:   "watch the change event.",
+			},
+
+			&cli.DurationFlag{
+				Name:        "cache_duration",
+				EnvVars:     []string{"MICRO_CONFIG_CACHE_DURATION"},
+				Usage:       "set cache duration.",
+				Value:       time.Minute * 5,
+				Destination: &CacheDuration,
+			},
+			&cli.DurationFlag{
+				Name:        "cache_cleanup_interval",
+				EnvVars:     []string{"MICRO_CONFIG_CACHE_CLEANUP_INTERVAL"},
+				Usage:       "set cache cleanup interval.",
+				Value:       time.Minute * 2,
+				Destination: &CacheCleanupInterval,
 			},
 
 			&cli.StringFlag{
