@@ -76,8 +76,7 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 		// read cache
 		v, ok := c.Cache.Get(key)
 		if ok {
-			obj := v.(*pb.Change)
-			return obj, nil
+			return v, nil
 		}
 
 		ch, err := c.Store.Read(key)
@@ -92,7 +91,21 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 			return nil, errors.NotFound(id, "not found key: %s", key)
 		}
 
-		return ch, nil
+		//rsp.Change = new(pb.Change)
+		//// Unmarshal value
+		//if err = json.Unmarshal(ch[0].Value, rsp.Change); err != nil {
+		//	return nil, errors.InternalServerError(id, "unmarshal key %v value error: %v", key, err)
+		//}
+		// 上述代码有问题, rsp.Change 只会被一个调用者赋值
+		Change := new(pb.Change)
+		// Unmarshal value
+		if err = json.Unmarshal(ch[0].Value, Change); err != nil {
+			return nil, errors.InternalServerError(id, "unmarshal key %v value error: %v", key, err)
+		}
+		//// 只执行一次
+		c.Cache.Set(key, Change, cache.DefaultExpiration)
+
+		return Change, nil
 	}
 
 	// 以 key 为单元阻塞
@@ -100,14 +113,10 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
-	ch := result.([]*store.Record)
 
-	rsp.Change = new(pb.Change)
-	// Unmarshal value
-	if err = json.Unmarshal(ch[0].Value, rsp.Change); err != nil {
-		return errors.InternalServerError(id, "unmarshal key %v value error: %v", key, err)
+	if result != nil {
+		rsp.Change = result.(*pb.Change)
 	}
-
 	return nil
 }
 
