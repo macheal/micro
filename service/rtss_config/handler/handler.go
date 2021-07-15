@@ -61,7 +61,8 @@ func CheckNamespacePath(id, namespace, path string) error {
 }
 
 func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResponse) error {
-	if err := CheckNamespacePath("go.micro.rtss_config.Read", req.Namespace, req.Path); err != nil {
+	id := "rtss_config.Read"
+	if err := CheckNamespacePath(id, req.Namespace, req.Path); err != nil {
 		return err
 	}
 
@@ -78,36 +79,33 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	ch, err := c.Store.Read(key)
 	if err != nil {
 		if err == store.ErrNotFound || err.Error() == "not found" {
-			return errors.NotFound("go.micro.rtss_config.Read", "not found key: %s", key)
+			return errors.NotFound(id, "not found key: %s", key)
 		}
-		return errors.InternalServerError("go.micro.rtss_config.Read", "read key %s error: %v", key, err)
+		return errors.InternalServerError(id, "read key %s error: %v", key, err)
 	}
 	// mongo store 实现问题, 需判断返回空的情况
 	if ch == nil {
-		return errors.NotFound("go.micro.rtss_config.Read", "not found key: %s", key)
+		return errors.NotFound(id, "not found key: %s", key)
 	}
 
 	rsp.Change = new(pb.Change)
 
 	// Unmarshal value
 	if err = json.Unmarshal(ch[0].Value, rsp.Change); err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Read", "unmarshal key %v value error: %v", key, err)
-	}
-
-	// if dont need path, we return all of the data
-	if len(req.Path) == 0 {
-		return nil
+		return errors.InternalServerError(id, "unmarshal key %v value error: %v", key, err)
 	}
 
 	return nil
 }
 
 func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
+	id := "rtss_config.Create"
+
 	if req.Change == nil || req.Change.ChangeSet == nil {
-		return errors.BadRequest("go.micro.rtss_config.Create", "invalid change")
+		return errors.BadRequest(id, "invalid change")
 	}
 
-	if err := CheckNamespacePath("go.micro.rtss_config.Create", req.Change.Namespace, req.Change.Path); err != nil {
+	if err := CheckNamespacePath(id, req.Change.Namespace, req.Change.Path); err != nil {
 		return err
 	}
 
@@ -123,14 +121,14 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 	var err error
 	record.Value, err = json.Marshal(req.Change)
 	if err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Create", "marshal key %v value error: %v", err)
+		return errors.InternalServerError(id, "marshal key %v value error: %v", err)
 	}
 
 	// set cache
 	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
 	if err := c.Store.Write(record); err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Create", "write key %s error: %v", err)
+		return errors.InternalServerError(id, "write key %s error: %v", err)
 	}
 
 	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
@@ -139,11 +137,12 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 }
 
 func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UpdateResponse) error {
+	id := "go.micro.rtss_config.Update"
 	if req.Change == nil || req.Change.ChangeSet == nil {
-		return errors.BadRequest("go.micro.rtss_config.Update", "invalid change")
+		return errors.BadRequest(id, "invalid change")
 	}
 
-	if err := CheckNamespacePath("go.micro.rtss_config.Update", req.Change.Namespace, req.Change.Path); err != nil {
+	if err := CheckNamespacePath(id, req.Change.Namespace, req.Change.Path); err != nil {
 		return err
 	}
 
@@ -160,7 +159,7 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	records, err := c.Store.Read(key)
 	if err != nil {
 		if err.Error() != "not found" {
-			return errors.NotFound("go.micro.rtss_config.Update", "read old value error: %v", err)
+			return errors.NotFound(id, "read old value error: %v", err)
 		}
 		// create new record
 		record = new(store.Record)
@@ -168,25 +167,25 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 	} else {
 		// mongo store 实现问题, 需判断返回空的情况
 		if records == nil {
-			return errors.NotFound("go.micro.rtss_config.Update", "read old value error: %v", err)
+			return errors.NotFound(id, "read old value error: %v", err)
 		}
 		// Unmarshal value
 		if err := json.Unmarshal(records[0].Value, oldCh); err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Read", "unmarshal key %s value error: %v", key, err)
+			return errors.InternalServerError(id, "unmarshal key %s value error: %v", key, err)
 		}
 		record = records[0]
 	}
 
 	record.Value, err = json.Marshal(req.Change)
 	if err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Update", "marshal error: %v", err)
+		return errors.InternalServerError(id, "marshal error: %v", err)
 	}
 
 	// set cache
 	c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
 	if err := c.Store.Write(record); err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Update", "write key %s error: %v", key, err)
+		return errors.InternalServerError(id, "write key %s error: %v", key, err)
 	}
 
 	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
@@ -195,11 +194,12 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 }
 
 func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.DeleteResponse) error {
+	id := "go.micro.rtss_config.Delete"
 	if req.Change == nil {
-		return errors.BadRequest("go.micro.rtss_config.Delete", "invalid change")
+		return errors.BadRequest(id, "invalid change")
 	}
 
-	if err := CheckNamespacePath("go.micro.rtss_config.Delete", req.Change.Namespace, req.Change.Path); err != nil {
+	if err := CheckNamespacePath(id, req.Change.Namespace, req.Change.Path); err != nil {
 		return err
 	}
 
@@ -216,7 +216,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	c.Cache.Delete(key)
 
 	if err := c.Store.Delete(key); err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Delete", "delete key %s error: %v", key, err)
+		return errors.InternalServerError(id, "delete key %s error: %v", key, err)
 	}
 
 	_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: nil})
@@ -225,12 +225,13 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 }
 
 func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResponse) (err error) {
+	id := "go.micro.rtss_config.List"
 	list, err := c.Store.List(
 		store.ListPrefix(req.Namespace),
 		store.ListSuffix(req.Suffix),
 		mongo.SetListSubstr(req.Substr))
 	if err != nil {
-		return errors.BadRequest("go.micro.rtss_config.List", "query value error: %v", err)
+		return errors.BadRequest(id, "query value error: %v", err)
 	}
 
 	for _, v := range list {
@@ -240,7 +241,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 
 		rec, err := c.Store.Read(v)
 		if err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Read", "read key %s error: %v", v, err)
+			return errors.InternalServerError(id, "read key %s error: %v", v, err)
 		}
 		if rec == nil {
 			continue
@@ -248,7 +249,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 
 		ch := &pb.Change{}
 		if err := json.Unmarshal(rec[0].Value, ch); err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Read", "unmarshal key %s value error: %v", rec[0].Key, err)
+			return errors.InternalServerError(id, "unmarshal key %s value error: %v", rec[0].Key, err)
 		}
 
 		if ch.ChangeSet != nil {
@@ -262,6 +263,7 @@ func (c *Config) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListResp
 }
 
 func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Config_WatchStream) error {
+	id := "go.micro.rtss_config.Watch"
 	if len(req.Namespace) == 0 {
 		return errors.BadRequest("go.micro.srv.Watch", "invalid id")
 	}
@@ -270,7 +272,7 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 
 	watch, err := Watch(namespace)
 	if err != nil {
-		return errors.InternalServerError("go.micro.rtss_config.Watch", "watch error: %v", err)
+		return errors.InternalServerError(id, "watch error: %v", err)
 	}
 	defer watch.Stop()
 
@@ -285,11 +287,11 @@ func (c *Config) Watch(ctx context.Context, req *pb.WatchRequest, stream pb.Conf
 	for {
 		ch, err := watch.Next()
 		if err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Watch", "listen the Next error: %v", err)
+			return errors.InternalServerError(id, "listen the Next error: %v", err)
 		}
 
 		if err := stream.Send(ch); err != nil {
-			return errors.InternalServerError("go.micro.rtss_config.Watch", "send the Change error: %v", err)
+			return errors.InternalServerError(id, "send the Change error: %v", err)
 		}
 	}
 }
