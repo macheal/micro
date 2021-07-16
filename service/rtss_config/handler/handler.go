@@ -11,6 +11,7 @@ import (
 	cr "gitee.com/smartsteps/go-micro/v2/config/reader"
 	jr "gitee.com/smartsteps/go-micro/v2/config/reader/json"
 	"gitee.com/smartsteps/go-micro/v2/config/source"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/sync/singleflight"
 
@@ -115,7 +116,6 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 
 func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
 	id := "rtss_config.Create"
-
 	if req.Change == nil || req.Change.ChangeSet == nil {
 		return errors.BadRequest(id, "invalid change")
 	}
@@ -129,21 +129,21 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := req.Change.Path
 
-	record := &store.Record{
-		Key: key,
-	}
-
-	value, err := json.Marshal(req.Change)
-	if err != nil {
-		return errors.InternalServerError(id, "marshal key %v value error: %v", err)
-	}
-
 	do := func() (interface{}, error) {
+		var err error
+		var record store.Record
+		record.Key = key
+		record.Value, err = json.Marshal(req.Change)
+		if err != nil {
+			return nil, errors.InternalServerError(id, "marshal key %v value error: %v", err)
+		}
+
+		log.Debugf("%s %s %s", id, key, req.Change.ChangeSet.Data)
+
 		// set cache
 		c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
-		record.Value = value
-		if err := c.Store.Write(record); err != nil {
+		if err := c.Store.Write(&record); err != nil {
 			return nil, errors.InternalServerError(id, "write key %s error: %v", err)
 		}
 
@@ -152,7 +152,7 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return nil, nil
 	}
 
-	_, err, _ = c.group.Do(key, do)
+	_, err, _ := c.group.Do(key, do)
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
@@ -170,56 +170,35 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return err
 	}
 
-	// set the changeset timestamp
 	req.Change.ChangeSet.Timestamp = time.Now().Unix()
-
-	oldCh := &pb.Change{}
 
 	namespace := setNamespaceReal(ctx, req.Change.Namespace)
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
-	value, err := json.Marshal(req.Change)
-	if err != nil {
-		return errors.InternalServerError(id, "marshal error: %v", err)
-	}
-
 	do := func() (interface{}, error) {
-		// Get the current change set
-		var record *store.Record
-		records, err := c.Store.Read(key)
+		var err error
+		var record store.Record
+		record.Key = key
+		record.Value, err = json.Marshal(req.Change)
 		if err != nil {
-			if err.Error() != "not found" {
-				return nil, errors.NotFound(id, "read old value error: %v", err)
-			}
-			// create new record
-			record = new(store.Record)
-			record.Key = key
-		} else {
-			// mongo store 实现问题, 需判断返回空的情况
-			if records == nil {
-				return nil, errors.NotFound(id, "read old value error: %v", err)
-			}
-			// Unmarshal value
-			if err := json.Unmarshal(records[0].Value, oldCh); err != nil {
-				return nil, errors.InternalServerError(id, "unmarshal key %s value error: %v", key, err)
-			}
-			record = records[0]
+			return nil, errors.InternalServerError(id, "marshal key %v value error: %v", err)
 		}
 
-		record.Value = value
+		log.Debugf("%s %s %s", id, key, req.Change.ChangeSet.Data)
 
 		// set cache
 		c.Cache.Set(key, req.Change, cache.DefaultExpiration)
 
-		if err := c.Store.Write(record); err != nil {
+		if err := c.Store.Write(&record); err != nil {
 			return nil, errors.InternalServerError(id, "write key %s error: %v", key, err)
 		}
 
 		_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: req.Change.ChangeSet})
+
 		return nil, nil
 	}
 
-	_, err, _ = c.group.Do(key, do)
+	_, err, _ := c.group.Do(key, do)
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
@@ -247,6 +226,8 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 	key := setKey(ctx, req.Change.Namespace, req.Change.Path)
 
 	do := func() (interface{}, error) {
+		log.Debugf("%s %s", id, key)
+
 		// delete cache
 		c.Cache.Delete(key)
 
