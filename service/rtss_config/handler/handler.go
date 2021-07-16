@@ -2,9 +2,7 @@ package handler
 
 import (
 	"context"
-	"crypto/md5"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -154,9 +152,7 @@ func (c *Config) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Crea
 		return nil, nil
 	}
 
-	hash := md5.Sum(record.Value)
-	hashKey := fmt.Sprintf("%x", hash)
-	_, err, _ = c.group.Do(hashKey, do)
+	_, err, _ = c.group.Do(key, do)
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
@@ -223,9 +219,7 @@ func (c *Config) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upda
 		return nil, nil
 	}
 
-	hash := md5.Sum(value)
-	hashKey := fmt.Sprintf("%x", hash)
-	_, err, _ = c.group.Do(hashKey, do)
+	_, err, _ = c.group.Do(key, do)
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
 	}
@@ -263,6 +257,7 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 		_ = publish(ctx, &pb.WatchResponse{Namespace: namespace, Path: key, ChangeSet: nil})
 		return nil, nil
 	}
+
 	_, err, _ := c.group.Do(key, do)
 	if err != nil {
 		return errors.InternalServerError(id, "group.Do(%s) error: %v", key, err)
