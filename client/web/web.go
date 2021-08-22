@@ -511,6 +511,11 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	// create the proxy
 	p := s.proxy()
 
+	//static
+	//dir := "../../static/"
+	dir := "./static/"
+	s.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+
 	// the web handler itself
 	s.HandleFunc("/favicon.ico", faviconHandler)
 	s.HandleFunc("/client", s.callHandler)
@@ -519,11 +524,6 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	s.HandleFunc("/rpc", handler.RPC)
 	s.PathPrefix("/{service:[a-zA-Z0-9]+}").Handler(p)
 	s.HandleFunc("/", s.indexHandler)
-
-	//static
-	//dir:="/c/go/src/github.com/macheal/micro/static/"
-	dir := "."
-	s.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
 	// insert the proxy
 	s.prx = p
