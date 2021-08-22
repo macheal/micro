@@ -511,6 +511,11 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	// create the proxy
 	p := s.proxy()
 
+	//static
+	//dir := "../../static/"
+	dir := "./static/"
+	s.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+
 	// the web handler itself
 	s.HandleFunc("/favicon.ico", faviconHandler)
 	s.HandleFunc("/client", s.callHandler)
@@ -596,7 +601,8 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	//authWrapper := apiAuth.Wrapper(s.resolver, s.nsResolver)
 
 	// create the service and add the auth wrapper
-	srv := httpapi.NewServer(Address) //, server.WrapHandler(authWrapper))
+	//srv := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
+	srv := httpapi.NewServer(Address)
 
 	srv.Init(opts...)
 	srv.Handle("/", h)
