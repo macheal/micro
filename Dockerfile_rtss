@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM hub.smartsteps.com/public/rt_apline
 #RUN apk --no-cache add make git go gcc libtool musl-dev
 
 # Configure Go
@@ -9,6 +9,7 @@ ENV PATH /go/bin:$PATH
 RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
 
 COPY micro /micro
+COPY static /static
 
 RUN apk add ca-certificates && \
     rm -rf /var/cache/apk/* /tmp/* && \

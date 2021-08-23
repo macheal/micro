@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/micro/go-micro/v2/client/grpc"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +14,7 @@ import (
 	"gitee.com/smartsteps/go-micro/v2/config/cmd"
 	"gitee.com/smartsteps/go-micro/v2/errors"
 	"github.com/micro/micro/v2/internal/helper"
+	ggrpc "google.golang.org/grpc"
 )
 
 type rpcRequest struct {
@@ -117,7 +120,16 @@ func RPC(w http.ResponseWriter, r *http.Request) {
 	// create request/response
 	var response json.RawMessage
 	var err error
-	req := (*cmd.DefaultOptions().Client).NewRequest(service, endpoint, request, client.WithContentType("application/json"))
+	cli := *cmd.DefaultOptions().Client
+	cli.Init(
+		grpc.MaxRecvMsgSize(math.MaxInt32),
+		grpc.MaxSendMsgSize(math.MaxInt32),
+		func(options *client.Options) {
+			_RecvMsgSize := grpc.CallOptions(ggrpc.MaxCallRecvMsgSize(math.MaxInt32))
+			_RecvMsgSize(&options.CallOptions)
+		},
+	)
+	req := cli.NewRequest(service, endpoint, request, client.WithContentType("application/json"))
 
 	// create context
 	ctx := helper.RequestToContext(r)
@@ -136,7 +148,7 @@ func RPC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// remote call
-	err = (*cmd.DefaultOptions().Client).Call(ctx, req, &response, opts...)
+	err = cli.Call(ctx, req, &response, opts...)
 	if err != nil {
 		ce := errors.Parse(err.Error())
 		switch ce.Code {
