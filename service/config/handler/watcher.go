@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 
-	proto "github.com/micro/go-micro/v2/config/source/service/proto"
+	proto "gitee.com/smartsteps/go-micro/v2/config/source/service/proto"
 )
 
 type watcher struct {

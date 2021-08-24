@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/micro/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/logger"
 	"golang.org/x/net/publicsuffix"
 )
 

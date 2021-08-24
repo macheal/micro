@@ -16,21 +16,22 @@ import (
 
 	"github.com/go-acme/lego/v3/providers/dns/cloudflare"
 	"github.com/gorilla/mux"
+	"gitee.com/smartsteps/go-micro/v2"
+	res "gitee.com/smartsteps/go-micro/v2/api/resolver"
+	"gitee.com/smartsteps/go-micro/v2/api/server"
+	"gitee.com/smartsteps/go-micro/v2/api/server/acme"
+	"gitee.com/smartsteps/go-micro/v2/api/server/acme/autocert"
+	"gitee.com/smartsteps/go-micro/v2/api/server/acme/certmagic"
+	"gitee.com/smartsteps/go-micro/v2/api/server/cors"
+	httpapi "gitee.com/smartsteps/go-micro/v2/api/server/http"
+	"gitee.com/smartsteps/go-micro/v2/auth"
+	"gitee.com/smartsteps/go-micro/v2/client/selector"
+	"gitee.com/smartsteps/go-micro/v2/config/cmd"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
+	"gitee.com/smartsteps/go-micro/v2/registry"
+	"gitee.com/smartsteps/go-micro/v2/sync/memory"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	res "github.com/micro/go-micro/v2/api/resolver"
-	"github.com/micro/go-micro/v2/api/server"
-	"github.com/micro/go-micro/v2/api/server/acme"
-	"github.com/micro/go-micro/v2/api/server/acme/autocert"
-	"github.com/micro/go-micro/v2/api/server/acme/certmagic"
-	"github.com/micro/go-micro/v2/api/server/cors"
-	httpapi "github.com/micro/go-micro/v2/api/server/http"
-	"github.com/micro/go-micro/v2/auth"
-	"github.com/micro/go-micro/v2/client/selector"
-	"github.com/micro/go-micro/v2/config/cmd"
-	log "github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/sync/memory"
+	apiAuth "github.com/micro/micro/v2/client/api/auth"
 	inauth "github.com/micro/micro/v2/internal/auth"
 	"github.com/micro/micro/v2/internal/handler"
 	"github.com/micro/micro/v2/internal/helper"
@@ -593,10 +594,10 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 
 	// create the namespace resolver and the auth wrapper
 	s.nsResolver = namespace.NewResolver(Type, Namespace)
-	//authWrapper := apiAuth.Wrapper(s.resolver, s.nsResolver)
+	authWrapper := apiAuth.Wrapper(s.resolver, s.nsResolver)
 
 	// create the service and add the auth wrapper
-	srv := httpapi.NewServer(Address) //, server.WrapHandler(authWrapper))
+	srv := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
 
 	srv.Init(opts...)
 	srv.Handle("/", h)

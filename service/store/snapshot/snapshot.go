@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/store"
 	"github.com/pkg/errors"
 )
 

@@ -23,7 +23,7 @@ func (e *{{title .Alias}}) Call(ctx context.Context, req *{{.Alias}}.Request, rs
 import (
 	"context"
 
-	log "github.com/micro/go-micro/v2/logger"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 
 	{{.Alias}} "{{.Dir}}/proto/{{.Alias}}"
 )
@@ -73,7 +73,7 @@ func (e *{{title .Alias}}) PingPong(ctx context.Context, stream {{.Alias}}.{{tit
 import (
 	"context"
 
-	log "github.com/micro/go-micro/v2/logger"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 
 	{{.Alias}} "{{.Dir}}/proto/{{.Alias}}"
 )
@@ -90,7 +90,7 @@ func (e *{{title .Alias}}) Handle(ctx context.Context, msg *{{.Alias}}.Message) 
 
 import (
 	"context"
-	log "github.com/micro/go-micro/v2/logger"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 
 	{{.Alias}} "{{.Dir}}/proto/{{.Alias}}"
 )
@@ -113,11 +113,11 @@ func Handler(ctx context.Context, msg *{{.Alias}}.Message) error {
 import (
 	"context"
 	"encoding/json"
-	log "github.com/micro/go-micro/v2/logger"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 
 	"{{.Dir}}/client"
-	"github.com/micro/go-micro/v2/errors"
-	api "github.com/micro/go-micro/v2/api/proto"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	api "gitee.com/smartsteps/go-micro/v2/api/proto"
 	{{.Alias}} "path/to/service/proto/{{.Alias}}"
 )
 
@@ -168,7 +168,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/micro/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/client"
 	{{.Alias}} "path/to/service/proto/{{.Alias}}"
 )
 

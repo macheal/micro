@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/store"
-	pb "github.com/micro/go-micro/v2/store/service/proto"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/metadata"
+	"gitee.com/smartsteps/go-micro/v2/store"
+	pb "gitee.com/smartsteps/go-micro/v2/store/service/proto"
 	"github.com/micro/micro/v2/internal/namespace"
 )
 

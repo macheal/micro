@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro/go-micro/v2/store"
+	"gitee.com/smartsteps/go-micro/v2/store"
 )
 
 func TestFileSnapshot(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	gorun "github.com/micro/go-micro/v2/runtime"
+	gorun "gitee.com/smartsteps/go-micro/v2/runtime"
 
 	"github.com/stretchr/testify/assert"
 )

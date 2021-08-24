@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/micro/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2"
 )
 
 func main() {

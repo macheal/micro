@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"gitee.com/smartsteps/go-micro/v2/agent/command"
+	"gitee.com/smartsteps/go-micro/v2/agent/input"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/agent/command"
-	"github.com/micro/go-micro/v2/agent/input"
 
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/registry/memory"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/registry/memory"
 )
 
 type testInput struct {

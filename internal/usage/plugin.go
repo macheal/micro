@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"gitee.com/smartsteps/go-micro/v2/registry"
+	"gitee.com/smartsteps/go-micro/v2/util/backoff"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/util/backoff"
 	"github.com/micro/micro/v2/plugin"
 )
 

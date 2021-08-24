@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	res "github.com/micro/go-micro/v2/api/resolver"
-	"github.com/micro/go-micro/v2/client/selector"
+	res "gitee.com/smartsteps/go-micro/v2/api/resolver"
+	"gitee.com/smartsteps/go-micro/v2/client/selector"
 	"github.com/micro/micro/v2/internal/namespace"
 	"golang.org/x/net/publicsuffix"
 )

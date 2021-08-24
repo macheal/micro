@@ -3,11 +3,11 @@ package client
 import (
 	"context"
 
+	"gitee.com/smartsteps/go-micro/v2/auth"
+	"gitee.com/smartsteps/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/client/grpc"
+	"gitee.com/smartsteps/go-micro/v2/metadata"
 	ccli "github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/auth"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/client/grpc"
-	"github.com/micro/go-micro/v2/metadata"
 	"github.com/micro/micro/v2/client/cli/util"
 	cliutil "github.com/micro/micro/v2/client/cli/util"
 	"github.com/micro/micro/v2/internal/config"

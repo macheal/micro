@@ -3,7 +3,9 @@ module github.com/micro/micro/v2
 go 1.13
 
 require (
-	github.com/aws/aws-sdk-go v1.23.0
+	gitee.com/smartsteps/go-micro-plugins v0.0.0-20210621095655-2c982104706e
+	gitee.com/smartsteps/go-micro/v2 v2.9.1
+	github.com/aws/aws-sdk-go v1.34.28
 	github.com/boltdb/bolt v1.3.1
 	github.com/chzyer/logex v1.1.10 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
@@ -16,9 +18,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
-	github.com/macheal/go-micro-plugins v0.0.0-20201230014311-b719c2d7731a
 	github.com/micro/cli/v2 v2.1.2
-	github.com/micro/go-micro/v2 v2.9.1
 	github.com/miekg/dns v1.1.27
 	github.com/netdata/go-orchestrator v0.0.0-20190905093727-c793edba0e8f
 	github.com/olekukonko/tablewriter v0.0.4
@@ -26,13 +26,18 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/spf13/viper v1.6.3
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/tools v0.0.0-20191216173652-a0e659d51361
 	google.golang.org/genproto v0.0.0-20191216164720-4f79533eabd1
 	google.golang.org/grpc v1.26.0
 )
 
-//replace github.com/macheal/go-micro-plugins => /Users/wangguangyu/go/src/github.com/macheal/go-micro-plugins
+//replace gitee.com/smartsteps/go-micro-plugins => /Users/wangguangyu/go/src/gitee.com/smartsteps/go-micro-plugins
+
+//replace gitee.com/smartsteps/go-micro-plugins => d:/project/Goland/micro/go-micro-plugins
+
+//replace gitee.com/smartsteps/go-micro/v2 => d:/project/Goland/micro/go-micro

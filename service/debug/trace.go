@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/debug/service"
+	log "gitee.com/smartsteps/go-micro/v2/logger"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/debug/service"
-	log "github.com/micro/go-micro/v2/logger"
 )
 
 const (

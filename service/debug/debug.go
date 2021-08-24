@@ -2,12 +2,12 @@
 package debug
 
 import (
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/debug/log"
+	"gitee.com/smartsteps/go-micro/v2/debug/log/kubernetes"
+	dservice "gitee.com/smartsteps/go-micro/v2/debug/service"
+	ulog "gitee.com/smartsteps/go-micro/v2/logger"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/debug/log"
-	"github.com/micro/go-micro/v2/debug/log/kubernetes"
-	dservice "github.com/micro/go-micro/v2/debug/service"
-	ulog "github.com/micro/go-micro/v2/logger"
 	logHandler "github.com/micro/micro/v2/service/debug/log/handler"
 	pblog "github.com/micro/micro/v2/service/debug/log/proto"
 	statshandler "github.com/micro/micro/v2/service/debug/stats/handler"

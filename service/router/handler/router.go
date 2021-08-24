@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/router"
-	pb "github.com/micro/go-micro/v2/router/service/proto"
+	"gitee.com/smartsteps/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2/router"
+	pb "gitee.com/smartsteps/go-micro/v2/router/service/proto"
 )
 
 // Router implements router handler

@@ -3,18 +3,18 @@ package handler
 import (
 	"net/http"
 
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/api/handler"
-	"github.com/micro/go-micro/v2/api/handler/event"
-	"github.com/micro/go-micro/v2/api/router"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/errors"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/api/handler"
+	"gitee.com/smartsteps/go-micro/v2/api/handler/event"
+	"gitee.com/smartsteps/go-micro/v2/api/router"
+	"gitee.com/smartsteps/go-micro/v2/client"
+	"gitee.com/smartsteps/go-micro/v2/errors"
 
 	// TODO: only import handler package
-	aapi "github.com/micro/go-micro/v2/api/handler/api"
-	ahttp "github.com/micro/go-micro/v2/api/handler/http"
-	arpc "github.com/micro/go-micro/v2/api/handler/rpc"
-	aweb "github.com/micro/go-micro/v2/api/handler/web"
+	aapi "gitee.com/smartsteps/go-micro/v2/api/handler/api"
+	ahttp "gitee.com/smartsteps/go-micro/v2/api/handler/http"
+	arpc "gitee.com/smartsteps/go-micro/v2/api/handler/rpc"
+	aweb "gitee.com/smartsteps/go-micro/v2/api/handler/web"
 )
 
 type metaHandler struct {

@@ -4,8 +4,9 @@ import (
 	"example-service/handler"
 	example "example-service/proto"
 
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/util/log"
+	"gitee.com/smartsteps/go-micro/v2"
+	"gitee.com/smartsteps/go-micro/v2/util/log"
+	"github.com/micro/micro/v2/cmd/protoc-gen-micro/plugin/micro"
 )
 
 func main() {
