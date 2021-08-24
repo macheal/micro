@@ -31,7 +31,6 @@ import (
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/sync/memory"
-	apiAuth "github.com/micro/micro/v2/client/api/auth"
 	inauth "github.com/micro/micro/v2/internal/auth"
 	"github.com/micro/micro/v2/internal/handler"
 	"github.com/micro/micro/v2/internal/helper"
@@ -594,10 +593,10 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 
 	// create the namespace resolver and the auth wrapper
 	s.nsResolver = namespace.NewResolver(Type, Namespace)
-	authWrapper := apiAuth.Wrapper(s.resolver, s.nsResolver)
+	//authWrapper := apiAuth.Wrapper(s.resolver, s.nsResolver)
 
 	// create the service and add the auth wrapper
-	srv := httpapi.NewServer(Address, server.WrapHandler(authWrapper))
+	srv := httpapi.NewServer(Address) //, server.WrapHandler(authWrapper))
 
 	srv.Init(opts...)
 	srv.Handle("/", h)
