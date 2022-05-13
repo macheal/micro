@@ -125,6 +125,10 @@ func RPC(w http.ResponseWriter, r *http.Request) {
 		grpc.MaxRecvMsgSize(math.MaxInt32),
 		grpc.MaxSendMsgSize(math.MaxInt32),
 		func(options *client.Options) {
+			_SenderMsgSize := grpc.CallOptions(ggrpc.MaxCallSendMsgSize(math.MaxInt32))
+			_SenderMsgSize(&options.CallOptions)
+		},
+		func(options *client.Options) {
 			_RecvMsgSize := grpc.CallOptions(ggrpc.MaxCallRecvMsgSize(math.MaxInt32))
 			_RecvMsgSize(&options.CallOptions)
 		},
