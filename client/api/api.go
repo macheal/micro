@@ -3,11 +3,6 @@ package api
 
 import (
 	"fmt"
-	"github.com/micro/micro/v2/client/api/auth"
-	"net/http"
-	"os"
-	"strings"
-
 	"github.com/go-acme/lego/v3/providers/dns/cloudflare"
 	"github.com/gorilla/mux"
 	"github.com/micro/cli/v2"
@@ -29,14 +24,25 @@ import (
 	"github.com/micro/go-micro/v2/api/server/acme/autocert"
 	"github.com/micro/go-micro/v2/api/server/acme/certmagic"
 	httpapi "github.com/micro/go-micro/v2/api/server/http"
+	cgrpc "github.com/micro/go-micro/v2/client/grpc"
 	log "github.com/micro/go-micro/v2/logger"
+	sserver "github.com/micro/go-micro/v2/server"
+	sgrpc "github.com/micro/go-micro/v2/server/grpc"
 	"github.com/micro/go-micro/v2/sync/memory"
+	"github.com/micro/micro/v2/client/api/auth"
 	"github.com/micro/micro/v2/internal/handler"
 	"github.com/micro/micro/v2/internal/helper"
 	"github.com/micro/micro/v2/internal/namespace"
 	rrmicro "github.com/micro/micro/v2/internal/resolver/api"
 	"github.com/micro/micro/v2/internal/stats"
 	"github.com/micro/micro/v2/plugin"
+	ggrpc "google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
+	"math"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 )
 
 var (
@@ -99,6 +105,27 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 
 	// append name to opts
 	srvOpts = append(srvOpts, micro.Name(Name))
+	srvOpts = append(srvOpts, func(options *micro.Options) {
+		options.Server.Init(
+			sgrpc.MaxMsgSize(math.MaxInt32),
+			func(opts *sserver.Options) {
+				//设置stream，保持长链接时间
+				_t := sgrpc.Options(ggrpc.KeepaliveParams(keepalive.ServerParameters{
+					MaxConnectionIdle: 2 * time.Hour,
+				}))
+				_t(opts)
+			},
+		)
+		options.Client.Init(
+			cgrpc.MaxSendMsgSize(math.MaxInt32),
+			cgrpc.MaxRecvMsgSize(math.MaxInt32),
+		//	func(options *client.Options) {
+		//		_RecvMsgSize := cgrpc.CallOptions(ggrpc.MaxCallRecvMsgSize(math.MaxInt32),ggrpc.MaxCallSendMsgSize(math.MaxInt32))
+		//		_RecvMsgSize(&options.CallOptions)
+		//},
+		)
+
+	})
 
 	// initialise service
 	service := micro.NewService(srvOpts...)
