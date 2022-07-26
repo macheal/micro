@@ -356,6 +356,7 @@ func Setup(app *ccli.App, options ...micro.Option) {
 		EnvVars:     []string{"RTSS_ETCD_ADDR"},
 		Destination: &_rtss_etcd_addr,
 	})
+	app.Run(os.Args)
 	if len(_rtss_etcd_addr) > 0 {
 		opt := micro.Registry(
 			etcd.NewRegistry(
