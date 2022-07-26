@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	registry2 "github.com/micro/go-micro/v2/registry"
+	"github.com/micro/go-micro/v2/registry/etcd"
 	"os"
 	"os/exec"
+	"strings"
 
 	ccli "github.com/micro/cli/v2"
 	"github.com/micro/go-micro/v2"
@@ -334,6 +337,35 @@ func Init(options ...micro.Option) {
 
 // Setup sets up a cli.App
 func Setup(app *ccli.App, options ...micro.Option) {
+
+	var _etcd_username string
+	app.Flags = append(app.Flags, &ccli.StringFlag{
+		Name:        "etcd_username",
+		EnvVars:     []string{"ETCD_USERNAME"},
+		Destination: &_etcd_username,
+	})
+	var _etcd_password string
+	app.Flags = append(app.Flags, &ccli.StringFlag{
+		Name:        "etcd_password",
+		EnvVars:     []string{"ETCD_PASSWORD"},
+		Destination: &_etcd_password,
+	})
+	var _rtss_etcd_addr string
+	app.Flags = append(app.Flags, &ccli.StringFlag{
+		Name:        "rtss_etcd_addr",
+		EnvVars:     []string{"RTSS_ETCD_ADDR"},
+		Destination: &_rtss_etcd_addr,
+	})
+	if len(_rtss_etcd_addr) > 0 {
+		opt := micro.Registry(
+			etcd.NewRegistry(
+				etcd.Auth(_etcd_username, _etcd_password),
+				func(options *registry2.Options) {
+					options.Addrs = strings.Split(_rtss_etcd_addr, ",")
+				}))
+		options = append(options, opt)
+	}
+
 	// Add the various commands
 	app.Commands = append(app.Commands, api.Commands(options...)...)
 	app.Commands = append(app.Commands, auth.Commands()...)

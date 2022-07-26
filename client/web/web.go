@@ -478,7 +478,8 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 	// Initialize Server
 	service := micro.NewService(srvOpts...)
 
-	reg := &reg{Registry: *cmd.DefaultOptions().Registry}
+	//reg := &reg{Registry: *cmd.DefaultOptions().Registry}
+	reg := &reg{Registry: service.Options().Registry}
 
 	s := &srv{
 		Router:   mux.NewRouter(),
