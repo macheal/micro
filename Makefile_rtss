@@ -21,7 +21,7 @@ vendor:
 build:
 	$(CROSS-LINUX) go build  -a -installsuffix cgo -ldflags "-s -w ${LDFLAGS}" -o $(NAME)
 
-docker:
+docker: build
 	docker build -f Dockerfile_rtss -t $(IMAGE_NAME):$(IMAGE_TAG)_$(BUILD_DATE) .
 	docker tag $(IMAGE_NAME):$(IMAGE_TAG)_$(BUILD_DATE) $(IMAGE_NAME):latest
 	docker push $(IMAGE_NAME):$(IMAGE_TAG)_$(BUILD_DATE)
