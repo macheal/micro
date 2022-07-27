@@ -22,7 +22,6 @@ import (
 	//"github.com/micro/go-micro/v2/proxy/grpc"
 	"github.com/micro/go-micro/v2/proxy/http"
 	"github.com/micro/go-micro/v2/proxy/mucp"
-	"github.com/micro/go-micro/v2/registry"
 	rmem "github.com/micro/go-micro/v2/registry/memory"
 	"github.com/micro/go-micro/v2/router"
 	rs "github.com/micro/go-micro/v2/router/service"
@@ -47,10 +46,18 @@ var (
 	ACMEProvider          = "autocert"
 	ACMEChallengeProvider = "cloudflare"
 	ACMECA                = acme.LetsEncryptProductionCA
+	log_level             = "info"
 )
 
 func Run(ctx *cli.Context, srvOpts ...micro.Option) {
-	log.Init(log.WithFields(map[string]interface{}{"service": "proxy"}))
+	if len(ctx.String("log_level")) > 0 {
+		log_level = ctx.String("log_level")
+	}
+	l, err := log.GetLevel(log_level)
+	if err != nil {
+		l = log.InfoLevel
+	}
+	log.Init(log.WithFields(map[string]interface{}{"service": "proxy"}), log.WithLevel(l))
 
 	// because MICRO_PROXY_ADDRESS is used internally by the go-micro/client
 	// we need to unset it so we don't end up calling ourselves infinitely
@@ -96,7 +103,8 @@ func Run(ctx *cli.Context, srvOpts ...micro.Option) {
 		router.Id(server.DefaultId),
 		router.Client(client.DefaultClient),
 		router.Address(routerAddr),
-		router.Registry(registry.DefaultRegistry),
+		//router.Registry(registry.DefaultRegistry),
+		router.Registry(service.Options().Registry),
 	}
 
 	// check if we need to use the router service
@@ -304,6 +312,11 @@ func Commands(options ...micro.Option) []*cli.Command {
 				Name:    "endpoint",
 				Usage:   "Set the endpoint to route to e.g greeter or localhost:9090",
 				EnvVars: []string{"MICRO_PROXY_ENDPOINT"},
+			},
+			&cli.StringFlag{
+				Name:    "log_level",
+				Usage:   "",
+				EnvVars: []string{"MICRO_PROXY_LOG_LEVEL"},
 			},
 		},
 		Action: func(ctx *cli.Context) error {
